@@ -24,4 +24,33 @@ public class XmlUtils {
         transformer.transform(new DOMSource(document), new StreamResult(sw));
         return sw.toString();
     }
+    
+    public static String prettyString(String xml) {
+        xml = xml.replaceAll("><", ">\n<"); // Line break between tags
+
+        String[] lines = xml.split("\n");
+        StringBuilder prettyXml = new StringBuilder();
+        int indentLevel = 0;
+        String indent = "  ";
+
+        for (String line : lines) {
+            line = line.trim();
+
+            if (line.matches("</.+>")) {
+                // Closing tag: decrease indent
+                indentLevel--;
+            }
+
+            for (int i = 0; i < indentLevel; i++) {
+                prettyXml.append(indent);
+            }
+            prettyXml.append(line).append("\n");
+
+            if (line.matches("<[^/?!][^>]*[^/]?>")) {
+                // Opening tag (not self-closing): increase indent
+                indentLevel++;
+            }
+        }
+        return prettyXml.toString();
+    }
 }

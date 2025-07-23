@@ -11,7 +11,7 @@ import main.annoter.pyvocode.Glossary;
 
 public class MivotUtils {
 
-    public static List<Map.Entry<String, String>> validMappedDmRoles(Map<String, String> mappedRoles, String className) throws MappingError {
+    public static List<Map.Entry<String, String>> validMappedDmRoles(Map<String, String> mappedRoles, String className) throws MappingError, IllegalArgumentException, IllegalAccessException {
     	Field field = null;
     	try {
     		field = Glossary.Roles.class.getDeclaredField(className);
@@ -26,7 +26,7 @@ public class MivotUtils {
             String mappedRole = entry.getKey();
             String column = entry.getValue();
 
-            if ("class".equals(mappedRole) ||  column instanceof Map || column instanceof List) continue;
+            if ("class".equals(mappedRole)) continue;
 
             boolean found = false;
             for (String leaf : modelRoles) {

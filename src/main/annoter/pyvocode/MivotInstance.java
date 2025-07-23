@@ -19,7 +19,7 @@ public class MivotInstance {
     public MivotInstance(String dmtype) throws MappingError {
         this(dmtype, null, null);
     }
-
+    
     public MivotInstance(String dmtype, String dmrole, String dmid) throws MappingError {
         if (dmtype == null || dmtype.isEmpty()) {
             throw new MappingError("Cannot build an instance without dmtype");
@@ -80,10 +80,10 @@ public class MivotInstance {
         if (instance == null) {
             throw new MappingError("Instance added must be of type MivotInstance");
         }
-        content.add(instance.xmlString());
+        content.add(instance.xmlString(false));
     }
 
-    public void addCollection(String dmrole, List<MivotInstance> instances) {
+    public void addCollection(String dmrole, List<MivotInstance> instances) throws MappingError {
         StringBuilder collection = new StringBuilder();
         collection.append("<COLLECTION");
         if (dmrole != null && !dmrole.isEmpty()) {
@@ -92,14 +92,15 @@ public class MivotInstance {
         collection.append(">\n");
 
         for (MivotInstance instance : instances) {
-            collection.append(instance.xmlString()).append("\n");
+            collection.append(instance.xmlString(false)).append("\n");
         }
 
         collection.append("</COLLECTION>");
         content.add(collection.toString());
     }
 
-    public String xmlString() {
+    public String xmlString(boolean dumm) throws MappingError {
+    	System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         StringBuilder xml = new StringBuilder();
         xml.append("<INSTANCE dmtype=\"").append(dmtype).append("\" ");
         if (dmrole != null) {

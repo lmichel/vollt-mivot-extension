@@ -21,7 +21,7 @@ public class MivotAnnotations {
     private List<String> templates;
     private String templatesId;
     private List<String> dmids;
-    private String mivotBlock;
+    public String mivotBlock;
 
     public MivotAnnotations() {
         this.models = new LinkedHashMap<>();
@@ -38,6 +38,19 @@ public class MivotAnnotations {
         return this.mivotBlock;
     }
 
+    public boolean containsDmid(String dmid) {
+    	return this.dmids.contains(dmid);
+    }
+    
+    public List<String> getDmids() {
+    	return this.dmids;
+    }
+    
+    public void addDmid(String dmid) {
+    	if( !this.dmids.contains(dmid)) {
+    		this.dmids.add(dmid);
+    	}
+    }
     private String getReport() {
         String status = reportStatus ? "OK" : "FAILED";
         return "<REPORT status=\"" + status + "\">" + reportMessage + "</REPORT>";
@@ -105,19 +118,20 @@ public class MivotAnnotations {
     public void addTemplates(Object instance) throws Exception {
         if (instance instanceof MivotInstance) {
             MivotInstance mi = (MivotInstance) instance;
-            templates.add(mi.xmlString());
+            System.out.println("@@@@@@@@@@@ " + mi.xmlString(false));
+            templates.add(mi.xmlString(false));
             if (mi.getDmid() != null) dmids.add(mi.getDmid());
         } else if (instance instanceof String) {
             templates.add((String) instance);
         } else {
-            throw new Exception("Invalid type for templates instance");
+            throw new Exception("Invalid type for templates instance: " + instance.getClass());
         }
     }
 
     public void addGlobals(Object instance) throws Exception {
         if (instance instanceof MivotInstance) {
             MivotInstance mi = (MivotInstance) instance;
-            globals.add(mi.xmlString());
+            globals.add(mi.xmlString(false));
             if (mi.getDmid() != null) dmids.add(mi.getDmid());
         } else if (instance instanceof String) {
             globals.add((String) instance);
