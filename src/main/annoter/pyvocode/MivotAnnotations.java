@@ -38,6 +38,19 @@ public class MivotAnnotations {
         return this.mivotBlock;
     }
 
+    public boolean containsDmid(String dmid) {
+    	return this.dmids.contains(dmid);
+    }
+    
+    public List<String> getDmids() {
+    	return this.dmids;
+    }
+    
+    public void addDmid(String dmid) {
+    	if( !this.dmids.contains(dmid)) {
+    		this.dmids.add(dmid);
+    	}
+    }
     private String getReport() {
         String status = reportStatus ? "OK" : "FAILED";
         return "<REPORT status=\"" + status + "\">" + reportMessage + "</REPORT>";

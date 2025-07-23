@@ -19,7 +19,7 @@ public class MivotInstance {
     public MivotInstance(String dmtype) throws MappingError {
         this(dmtype, null, null);
     }
-
+    
     public MivotInstance(String dmtype, String dmrole, String dmid) throws MappingError {
         if (dmtype == null || dmtype.isEmpty()) {
             throw new MappingError("Cannot build an instance without dmtype");
