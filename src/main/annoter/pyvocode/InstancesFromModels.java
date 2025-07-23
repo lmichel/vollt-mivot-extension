@@ -11,11 +11,11 @@ public class InstancesFromModels {
 
     private static final Logger LOGGER = Logger.getLogger(InstancesFromModels.class.getName());
 
-    private MangoInstance mangoInstance;
+    private MangoObject mangoInstance;
     private MivotAnnotations annotation;
 
     public InstancesFromModels(String dmid) {
-        this.mangoInstance = new MangoInstance(dmid);
+        this.mangoInstance = new MangoObject(dmid);
         this.annotation = new MivotAnnotations();
 
         this.annotation.addModel("ivoa", Glossary.VodmlUrl.IVOA);
@@ -185,7 +185,7 @@ public class InstancesFromModels {
         if (sparse) {
             // Add each individual property to the TEMPLATES block
             for (MivotInstance prop : mangoInstance.getMangoProperties()) {
-                annotation.addTemplates(prop.xmlString());
+                annotation.addTemplates(prop.xmlString(false));
             }
         } else {
             // Add the packed MangoObject to the TEMPLATES block
