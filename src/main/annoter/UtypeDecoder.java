@@ -1,68 +1,146 @@
 package main.annoter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import tap.metadata.TAPColumn;
 
 public class UtypeDecoder {
+	private TAPColumn tapColumn;
 	private String utype;
-	private String snippet;
-	private String role;
-	private  Map<String, String> frames = new HashMap<String, String>();
-	private  Map<String, String> constants = new HashMap<String, String>();
+	private String hostClass;
+	private int instanceNumber = 0;
+	private String hostAttribute;
+	private String innerRole;
+	private String innerClass;
+	private String innerAttribute;
+	private  List<String> frames = new ArrayList<String>();
+	private  List<String> constants = new ArrayList<String>();
 	
-	public UtypeDecoder(String utype) {
-		this.utype = utype;
+	String CLASS_NAME = "[A-Z][\\w]+";
+	String FIELD = "[a-z0-9_]+";
+	String SIMPLE_ROLE = FIELD + ":" + "(?:" + FIELD + "\\.)?" + CLASS_NAME + ")\\.(" + FIELD;
+	String COMPOUND =  "^(" + SIMPLE_ROLE + ")\\.(" + FIELD + ")\\/(" + SIMPLE_ROLE + ")$";
+
+	public UtypeDecoder(TAPColumn tapColumn ){
+		this.tapColumn = tapColumn;
+		this.utype = this.tapColumn.getUtype() ;
 		String[] eles = utype.split(":");
-		int bpos;
-		if( (bpos = utype.indexOf("[")) > 0) {
-			
-		    String extension =  utype.substring(bpos + 1).replace("]", "");
-			utype = utype.substring(0, bpos);
-			String[] extensions = extension.split(" ");
-			for( String ext: extensions) {
-				if( ext.startsWith("CS.spaceSys") == true) {
-					this.frames.put("spaceSys", ext.split("=")[1] );
-				}
-				else if( ext.startsWith("CS.timeSys") == true) {
-					this.frames.put("timeSys", ext.split("=")[1] );
-				} 					
-				else if( ext.startsWith("CT.representation") == true) {
-					this.constants.put("representation", ext.split("=")[1] );
 
-				}
-
-			}
+		this.extractConstantsAndFrames();
+		if( this.processSimpleRole() == false && this.processCompound() == false ) {
+			System.out.println("UTYPE not valid: " + this.utype);
+			System.exit(1);
+		}  else {
+			return;
 		}
-
+		
+		if( utype.matches("^#\\d\\-.*")) {
+			this.instanceNumber = Integer.parseInt(utype.substring(1,2));
+			this.utype = this.utype.substring(3);
+		}
+	
 		if( eles.length == 1) {
 			System.out.println("wrong format 1");
 		} else if( eles.length == 2) {
-			int idx = utype.lastIndexOf(".");
-			this.snippet = utype.substring(0, idx);
-		    this.role = utype.substring(0, idx) + "." +  utype.substring(idx + 1);
+			int idx = this.utype.lastIndexOf(".");
+			this.hostClass = this.utype.substring(0, idx);
+		    this.hostAttribute = this.utype.substring(0, idx) + "." +  this.utype.substring(idx + 1);
 
 		} else if( eles.length > 2) {
-			int idx = utype.indexOf("/");
-			this.snippet = utype.substring(0, idx-1);
-		    this.role =  utype.substring(idx + 1);
+			int idx = this.utype.indexOf("/");
+			this.hostClass = this.utype.substring(0, idx-1);
+		    this.hostAttribute =  this.utype.substring(idx + 1);
 		}
+		this.extractConstantsAndFrames();
+
 	}
 	
-	public String getSnippet() {
-		return this.snippet;
+	private boolean processSimpleRole() {
+        String input = "mango:EpochPosition.errors";
+
+        Pattern pattern = Pattern.compile("^(" + SIMPLE_ROLE + ")$");
+        Matcher matcher = pattern.matcher(this.utype);
+
+        if (matcher.find()) {
+            this.hostClass = matcher.group(1);
+            this.hostAttribute = matcher.group(2);
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean processCompound() {
+        Pattern pattern = Pattern.compile(this.COMPOUND);
+        Matcher matcher = pattern.matcher(this.utype);
+
+        if (matcher.find()) {
+            this.hostClass =  matcher.group(1);
+            this.hostAttribute = matcher.group(2);
+            this.innerRole = matcher.group(3);
+            this.innerClass = matcher.group(4);
+            this.innerAttribute =  matcher.group(5);
+        } else {
+            System.out.println("No match found.");
+            return false;
+        }
+        return true;
+    }
+
+	private void extractConstantsAndFrames() {
+        String input = "prefix text [CS.name=John CT.age=30]";
+        input = this.utype;
+        String regex = "([^\\[]*)(\\[(C(?:S|T)\\.\\w+=\\w+\\s?)+\\])?";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.matches()) {
+            this.utype = matcher.group(1).trim();
+
+            String bracketedBlock = matcher.group(2);
+            if (bracketedBlock != null) {
+                Matcher innerMatcher = Pattern.compile("C(?:S|T)\\.\\w+=\\w+").matcher(bracketedBlock);
+                while (innerMatcher.find()) {
+                	String match = innerMatcher.group();
+                	if( match.startsWith("CS")) {
+                		this.frames.add(match.replace("CS.", ""));
+                	} else if( match.startsWith("CT")) {
+                		this.constants.add(match.replace("CT.", ""));
+                	} else {
+                		System.out.println("Unsupported bracketed element: " + matcher);
+                	}
+                }
+            } 
+        } else {
+            System.out.println("No match for input: " + input);
+        }
+    }
+	public String getHostClass() {
+		return this.hostClass;
 	}
-	public String getRole() {
-		return this.role;
+	public String getHostAttribute() {
+		return this.hostAttribute;
 	}
-	public Map<String, String> getFrames() {
+	public List<String> getFrames() {
 		return this.frames;
 	}
-	public Map<String, String> getConstants() {
+	public List<String> getConstants() {
 		return this.constants;
-		
+	}
+	public TAPColumn getTapColumn() {
+		return this.tapColumn;
 	}
 	public String toString() {
-		return "utype=" + this.utype + " snippet=" + this.snippet + " role=" + this.role;
+		return "utype=" + this.utype + "\n instanceNumber=" + this.instanceNumber 
+				+ "\n hostClass=" + this.hostClass + "\n hostAttribute=" + this.hostAttribute 
+				+ "\n innerRole=" + this.innerRole + "\n   innerClass=" + this.innerClass + "\n   innerAttribute=" + this.innerAttribute
+				+ "\n frames=" + this.frames + "\n constants=" + this.constants;
 	}
 
 }

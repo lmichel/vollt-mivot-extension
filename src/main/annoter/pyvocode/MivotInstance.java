@@ -105,7 +105,7 @@ public class MivotInstance {
         if (dmrole != null) {
             xml.append("dmrole=\"").append(dmrole).append("\" ");
         }
-        if (dmid != null) {
+        if (dmid != null && dmid.length() > 0 ) {
             xml.append("dmid=\"").append(dmid).append("\" ");
         }
         xml.append(">\n");

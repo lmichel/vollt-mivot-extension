@@ -19,6 +19,9 @@ public class SimpleAnnotationTapSchemaTest {
 		List<TAPColumn> tapColumns = new ArrayList();
 		tapColumns.add(new TAPColumn("columnName",
 				"description", "unit", "ucd",
+				"#2-mango:EpochPosition.errors.position/mango:error.PErrorSym2D.sigma1"));
+		tapColumns.add(new TAPColumn("columnName",
+				"description", "unit", "ucd",
 				"#2-mango:EpochPosition:/mango:EpochPositionErrors.position/mango:error.PErrorSym2D.sigma1"));
 		tapColumns.add(new TAPColumn("longitude",
 				"description", "unit", "ucd",
@@ -31,6 +34,9 @@ public class SimpleAnnotationTapSchemaTest {
 		tapColumns.add(new TAPColumn("MJD_FIRST",
 				"description", "year", "ucd",
 				"mango:EpochPosition:/mango:EpochPosition.obsDate/mango:DateTime.dateTime[CT.representation=year]"));
+		tapColumns.add(new TAPColumn("MJD_FIRST",
+				"description", "year", "ucd",
+				"mango:EpochPosition.obsDate/mango:DateTime.dateTime[CT.representation=year]"));
 
 		try {
 			
