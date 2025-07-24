@@ -5,12 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import adql.db.DefaultDBTable;
-import main.annoter.UtypeDecoder;
 import main.annoter.pyvocode.EpochPosition;
 import main.annoter.pyvocode.MangoInstance;
 import main.annoter.pyvocode.MappingCache;
 import main.annoter.pyvocode.MivotAnnotations;
-import main.annoter.pyvocode.MivotInstance;
 import tap.metadata.TAPColumn;
 
 public class TestMivotAnnotations {

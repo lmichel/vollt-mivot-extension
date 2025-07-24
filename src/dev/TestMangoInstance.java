@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import main.annoter.pyvocode.MangoInstance;
 import main.annoter.pyvocode.MappingError;
-import main.annoter.pyvocode.MivotInstance;
 
 public class TestMangoInstance {
 

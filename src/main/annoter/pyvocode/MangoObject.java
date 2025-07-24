@@ -67,37 +67,6 @@ public class MangoObject {
         return datetimeInstance;
     }
 
-    public Property addEpochPosition(String spaceFrameId, String timeFrameId,
-                                     Map<String, Object> mapping, Map<String, String> semantics) throws MappingError {
-
-        Property epInstance = new Property(Glossary.ModelPrefix.MANGO + ":EpochPosition", null, null, semantics);
-
-        //MivotUtils.populateInstance(epInstance, "EpochPosition", mapping, table, IvoaType.RealQuantity);
-
-        if (mapping.containsKey("obsDate")) {
-            epInstance.addInstance(buildEpochDate((Map<String, Object>) mapping.get("obsDate")));
-        }
-
-        if (mapping.containsKey("correlations")) {
-            epInstance.addInstance(buildEpochCorrelations((Map<String, Object>) mapping.get("correlations")));
-        }
-
-        if (mapping.containsKey("errors")) {
-            epInstance.addInstance(buildEpochErrors((Map<String, Map<String, Object>>) mapping.get("errors")));
-        }
-
-        if (spaceFrameId != null) {
-            epInstance.addReference(Glossary.ModelPrefix.MANGO + ":EpochPosition.spaceSys", spaceFrameId);
-        }
-
-        if (timeFrameId != null) {
-            epInstance.addReference(Glossary.ModelPrefix.MANGO + ":EpochPosition.timeSys", timeFrameId);
-        }
-
-        properties.add(epInstance);
-        return epInstance;
-    }
-
     public Property addBrightnessProperty(String filterId, Map<String, Object> mapping, Map<String, String> semantics) throws MappingError {
         Property magInstance = new Property(Glossary.ModelPrefix.MANGO + ":Brightness", null, null, semantics);
 

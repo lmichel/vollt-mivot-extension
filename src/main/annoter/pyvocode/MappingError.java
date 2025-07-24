@@ -10,7 +10,9 @@ package main.annoter.pyvocode;
  */
 public class MappingError extends Exception {
 
-    public MappingError() {
+    private static final long serialVersionUID = 1L;
+
+	public MappingError() {
         super();
     }
 

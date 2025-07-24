@@ -3,9 +3,6 @@ package main.annoter.pyvocode;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.annoter.pyvocode.MappingError;
-import main.annoter.pyvocode.MivotUtils;
-
 /**
  * Java equivalent of the Python class MivotInstance.
  * Represents an <INSTANCE> element in a MIVOT annotation.

@@ -11,7 +11,7 @@ public class TestUtypeDecoder {
 	
 	public static void main(String[] args) throws IOException {
 
-		List<TAPColumn> tapColumns = new ArrayList();
+		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
 
 		tapColumns.add(new TAPColumn("columnName_1",
 				"description", "unit", "ucd",

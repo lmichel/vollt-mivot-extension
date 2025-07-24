@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adql.db.DefaultDBTable;
-import main.annoter.UtypeDecoder;
 import main.annoter.pyvocode.MappingCache;
 import tap.metadata.TAPColumn;
 
@@ -13,7 +12,7 @@ public class TestMappingCache {
 
 	public static void main(String[] args) throws IOException {
 
-		List<TAPColumn> tapColumns = new ArrayList();
+		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
 
 		tapColumns.add(new TAPColumn("columnName_1",
 				"description", "unit", "ucd",

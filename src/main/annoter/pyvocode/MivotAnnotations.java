@@ -1,15 +1,11 @@
 package main.annoter.pyvocode;
 
 import java.util.*;
-import java.io.File;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
-
-import main.utils.XMLUtils;
 
 public class MivotAnnotations {
     private static final Logger logger = Logger.getLogger(MivotAnnotations.class.getName());
