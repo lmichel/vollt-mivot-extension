@@ -9,6 +9,7 @@ public class MangoObject {
 
     private final List<Property> properties = new ArrayList<>();
     private final String dmid;
+    private boolean withOrigin = false;
 
     public MangoObject(String dmid) {
         this.dmid = dmid;
@@ -173,8 +174,12 @@ public class MangoObject {
 
         return mangoObject;
     }
+    
+    public void includeOrigin(boolean yesOrNo) {
+    	this.withOrigin = yesOrNo;
+    }
 
-    public String toXml(boolean withOrigin) throws MappingError {
+    public String toXml() throws MappingError {
         MivotInstance mangoObject = new MivotInstance("mango:MangoObject", null, dmid);
 
         if (dmid != null) {
@@ -183,7 +188,7 @@ public class MangoObject {
             mangoObject.addAttribute("mango:MangoObject.identifier", Glossary.IvoaType.STRING, value, null);
         }
 
-        if (withOrigin) {
+        if (this.withOrigin) {
             mangoObject.addReference("mango:MangoObject.queryOrigin", "_origin");
         }
 

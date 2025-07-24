@@ -2,6 +2,7 @@ package main.annoter.pyvocode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,14 +13,15 @@ public class MappingCache {
 	Map<String, Map<String, UtypeDecoder>> cache;
 	
 	public MappingCache() {
-		this.cache = new HashMap<String, Map<String, UtypeDecoder>>();
+		this.cache = new LinkedHashMap<String, Map<String, UtypeDecoder>>();
 	}
 	public void addTAPColumn(TAPColumn tapColumn) {
 		String tableName = tapColumn.getTable().getADQLName();
 		if( this.cache.containsKey(tableName) == false ) {
-			this.cache.put(tableName, new HashMap<String, UtypeDecoder>());
+			this.cache.put(tableName, new LinkedHashMap<String, UtypeDecoder>());
 		}
-		this.cache.get(tableName).put(tapColumn.getADQLName(), new UtypeDecoder(tapColumn));
+		UtypeDecoder utypeDecoder = new UtypeDecoder(tapColumn);
+		this.cache.get(tableName).put(tapColumn.getADQLName(), utypeDecoder);
 	}
 	
 	public Map<String, UtypeDecoder> getTableMapping(String adqlTableName){

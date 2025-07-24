@@ -51,6 +51,55 @@ public class MivotAnnotations {
     		this.dmids.add(dmid);
     	}
     }
+    
+    public String addDefaultSpaceFrame() throws Exception {
+    	return this.addSimpleSpaceFrame(null, null, null, null);
+    }
+    public String addSimpleSpaceFrame(String spaceRefFrame, String refPosition, String equinox, String epoch) throws Exception {
+        spaceRefFrame = (spaceRefFrame == null)? "ICRS": spaceRefFrame;
+        refPosition = (refPosition == null)? "BARYCENTER": refPosition;
+ 
+        String dmid = "_spaceframe_" + spaceRefFrame + "_" + refPosition;
+        if (equinox != null) dmid += "_" + equinox;
+
+        if (this.containsDmid(dmid)) {
+            System.out.println("Space frame already exists: " + dmid);
+            return dmid;
+        }
+        this.addDmid(dmid);
+
+        this.addModel(Glossary.ModelPrefix.IVOA, Glossary.VodmlUrl.IVOA);
+        this.addModel(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
+
+
+        MivotInstance spaceSys = new MivotInstance(Glossary.ModelPrefix.COORDS + ":SpaceSys", null, dmid);
+        MivotInstance spaceFrame = new MivotInstance(Glossary.ModelPrefix.COORDS + ":SpaceFrame",
+        		Glossary.ModelPrefix.COORDS + ":PhysicalCoordSys.frame", null);
+
+        spaceFrame.addAttribute(Glossary.IvoaType.STRING, Glossary.ModelPrefix.COORDS + ":SpaceFrame.spaceRefFrame", spaceRefFrame, null);
+
+        if (equinox != null) {
+            spaceFrame.addAttribute(Glossary.ModelPrefix.COORDS + ":Epoch",
+            		Glossary.ModelPrefix.COORDS + ":SpaceFrame.equinox", equinox, null);
+        }
+
+        MivotInstance refLoc = (epoch != null)
+                ? new MivotInstance(Glossary.ModelPrefix.COORDS + ":CustomRefLocation",
+                		Glossary.ModelPrefix.COORDS + ":SpaceFrame.refPosition", null)
+                : new MivotInstance(Glossary.ModelPrefix.COORDS + ":StdRefLocation",
+                		Glossary.ModelPrefix.COORDS + ":SpaceFrame.refPosition", null);
+
+        refLoc.addAttribute(Glossary.IvoaType.STRING, Glossary.ModelPrefix.COORDS + ":StdRefLocation.position", refPosition, null);
+        if (epoch != null) {
+            refLoc.addAttribute("coords:Epoch", Glossary.ModelPrefix.COORDS + ":CustomRefLocation.epoch", epoch, null);
+        }
+
+        spaceFrame.addInstance(refLoc);
+        spaceSys.addInstance(spaceFrame);
+        this.addGlobals(spaceSys);
+
+        return dmid;
+    }
     private String getReport() {
         String status = reportStatus ? "OK" : "FAILED";
         return "<REPORT status=\"" + status + "\">" + reportMessage + "</REPORT>";
@@ -108,7 +157,7 @@ public class MivotAnnotations {
         sb.append(getTemplates()).append("\n");
         sb.append("</VODML>");
 
-        this.mivotBlock = XmlUtils.prettyFormat(sb.toString());
+        this.mivotBlock = XmlUtils.prettyString(sb.toString()).replaceAll("\n\\s*\n", "\n");
 
         if (schemaCheck) {
             checkXml();
@@ -118,8 +167,7 @@ public class MivotAnnotations {
     public void addTemplates(Object instance) throws Exception {
         if (instance instanceof MivotInstance) {
             MivotInstance mi = (MivotInstance) instance;
-            System.out.println("@@@@@@@@@@@ " + mi.xmlString(false));
-            templates.add(mi.xmlString(false));
+            templates.add(mi.xmlString());
             if (mi.getDmid() != null) dmids.add(mi.getDmid());
         } else if (instance instanceof String) {
             templates.add((String) instance);
@@ -131,7 +179,7 @@ public class MivotAnnotations {
     public void addGlobals(Object instance) throws Exception {
         if (instance instanceof MivotInstance) {
             MivotInstance mi = (MivotInstance) instance;
-            globals.add(mi.xmlString(false));
+            globals.add(mi.xmlString());
             if (mi.getDmid() != null) dmids.add(mi.getDmid());
         } else if (instance instanceof String) {
             globals.add((String) instance);

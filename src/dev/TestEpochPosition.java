@@ -16,15 +16,21 @@ public class TestEpochPosition {
 
 	public static void main(String[] args) throws IOException, MappingError {
 
-		List<TAPColumn> tapColumns = new ArrayList();
+		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
 
 		tapColumns.add(new TAPColumn("columnName_1",
 				"description", "unit", "ucd",
 				"mango:EpochPosition.errors"));
 		
-		tapColumns.add(new TAPColumn("columnName_2",
+		tapColumns.add(new TAPColumn("columnName_21",
 				"description", "unit", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorSym2D.sigma1"));
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.majorAxis"));
+		tapColumns.add(new TAPColumn("columnName_22",
+				"description", "unit", "ucd",
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.minorAxis"));
+		tapColumns.add(new TAPColumn("columnName_23",
+				"description", "unit", "ucd",
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.angle"));
 		
 		tapColumns.add(new TAPColumn("columnName_3",
 				"description", "unit", "ucd",
@@ -44,7 +50,8 @@ public class TestEpochPosition {
 			mappingCache.addTAPColumn(tapColumn);
 		}
 		
-		EpochPosition epochPosition = new EpochPosition(mappingCache, "ma_table", Arrays.asList("columnName_5", "columnName_4"));
+		EpochPosition epochPosition = new EpochPosition(mappingCache, "ma_table",
+				Arrays.asList("columnName_21", "columnName_22", "columnName_23", "columnName_5", "columnName_4"));
 		System.out.println(epochPosition.xmlString());
 	}
 }

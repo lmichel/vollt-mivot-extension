@@ -10,7 +10,6 @@ public class Property extends MivotInstance {
 
     public Property(String dmtype, String dmrole, String dmid, Map<String, String> semantics) throws MappingError {
         super(dmtype, dmrole, dmid);
-
         if (semantics.containsKey("description")) {
             this.addAttribute("ivoa:string", "mango:Property.description", "*" + semantics.get("description"), null);
         }

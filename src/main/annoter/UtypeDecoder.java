@@ -22,9 +22,10 @@ public class UtypeDecoder {
 	private  List<String> constants = new ArrayList<String>();
 	
 	String CLASS_NAME = "[A-Z][\\w]+";
-	String FIELD = "[a-z0-9_]+";
-	String SIMPLE_ROLE = FIELD + ":" + "(?:" + FIELD + "\\.)?" + CLASS_NAME + ")\\.(" + FIELD;
-	String COMPOUND =  "^(" + SIMPLE_ROLE + ")\\.(" + FIELD + ")\\/(" + SIMPLE_ROLE + ")$";
+	String PACKAGE= "[a-z][a-z0-9_]+";
+	String FIELD = "[a-z][a-zA-Z0-9_]+";
+	String SIMPLE_ROLE = "(" + PACKAGE + ":" + "(?:" + PACKAGE + "\\.)?" + CLASS_NAME + ")\\.(" + FIELD + ")";
+	String COMPOUND =  "^" + SIMPLE_ROLE + "\\.(" + FIELD + ")\\/" + SIMPLE_ROLE + "$";
 
 	public UtypeDecoder(TAPColumn tapColumn ){
 		this.tapColumn = tapColumn;
@@ -63,7 +64,7 @@ public class UtypeDecoder {
 	private boolean processSimpleRole() {
         String input = "mango:EpochPosition.errors";
 
-        Pattern pattern = Pattern.compile("^(" + SIMPLE_ROLE + ")$");
+        Pattern pattern = Pattern.compile("^" + SIMPLE_ROLE + "$");
         Matcher matcher = pattern.matcher(this.utype);
 
         if (matcher.find()) {
@@ -78,7 +79,6 @@ public class UtypeDecoder {
     public boolean processCompound() {
         Pattern pattern = Pattern.compile(this.COMPOUND);
         Matcher matcher = pattern.matcher(this.utype);
-
         if (matcher.find()) {
             this.hostClass =  matcher.group(1);
             this.hostAttribute = matcher.group(2);
@@ -86,7 +86,6 @@ public class UtypeDecoder {
             this.innerClass = matcher.group(4);
             this.innerAttribute =  matcher.group(5);
         } else {
-            System.out.println("No match found.");
             return false;
         }
         return true;
@@ -126,6 +125,15 @@ public class UtypeDecoder {
 	}
 	public String getHostAttribute() {
 		return this.hostAttribute;
+	}
+	public String getInnerRole() {
+		return this.innerRole;
+	}
+	public String getInnerClass() {
+		return this.innerClass;
+	}
+	public String getInnerAttribute() {
+		return this.innerAttribute;
 	}
 	public List<String> getFrames() {
 		return this.frames;

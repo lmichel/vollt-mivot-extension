@@ -10,7 +10,7 @@ public class TestMangoInstance {
 
 	public static void main(String[] args) throws IOException, MappingError {
 		MangoInstance mi = new MangoInstance("dmtype");
-		System.out.println(mi.xmlString(false));
+		System.out.println(mi.xmlString());
 	}
 
 }

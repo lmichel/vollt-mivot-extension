@@ -80,7 +80,7 @@ public class MivotInstance {
         if (instance == null) {
             throw new MappingError("Instance added must be of type MivotInstance");
         }
-        content.add(instance.xmlString(false));
+        content.add(instance.xmlString());
     }
 
     public void addCollection(String dmrole, List<MivotInstance> instances) throws MappingError {
@@ -92,15 +92,14 @@ public class MivotInstance {
         collection.append(">\n");
 
         for (MivotInstance instance : instances) {
-            collection.append(instance.xmlString(false)).append("\n");
+            collection.append(instance.xmlString()).append("\n");
         }
 
         collection.append("</COLLECTION>");
         content.add(collection.toString());
     }
 
-    public String xmlString(boolean dumm) throws MappingError {
-    	System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    public String xmlString() throws MappingError {
         StringBuilder xml = new StringBuilder();
         xml.append("<INSTANCE dmtype=\"").append(dmtype).append("\" ");
         if (dmrole != null) {
@@ -112,10 +111,10 @@ public class MivotInstance {
         xml.append(">\n");
 
         for (String element : content) {
-            xml.append("   ").append(element).append("\n");
+            xml.append(element).append("\n");
         }
 
         xml.append("</INSTANCE>\n");
-        return xml.toString();
+        return XmlUtils.prettyString(xml.toString());
     }
 }

@@ -36,7 +36,7 @@ public class XmlUtils {
         for (String line : lines) {
             line = line.trim();
 
-            if (line.matches("</.+>")) {
+            if (line.matches("</.+>") ) {
                 // Closing tag: decrease indent
                 indentLevel--;
             }
@@ -49,6 +49,10 @@ public class XmlUtils {
             if (line.matches("<[^/?!][^>]*[^/]?>")) {
                 // Opening tag (not self-closing): increase indent
                 indentLevel++;
+            }
+            // self-closing: decrease indent
+            if( line.indexOf("/>") != -1) {
+                indentLevel--;
             }
         }
         return prettyXml.toString();

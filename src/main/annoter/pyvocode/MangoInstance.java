@@ -9,6 +9,7 @@ public class MangoInstance extends MivotInstance{
 
     private final List<Property> properties = new ArrayList<>();
     private final String dmid;
+    private boolean withOrigin=false;
 
     public MangoInstance(String dmid) throws MappingError {
     	super("mango:MangoObject");
@@ -31,6 +32,10 @@ public class MangoInstance extends MivotInstance{
 
     public List<Property>getMangoProperties(){
     	return this.properties;
+    }
+    
+    public void addMangoProperties(Property property){
+    	this.properties.add(property);
     }
     private MivotInstance buildEpochErrors(Map<String, Map<String, Object>> errors) throws MappingError {
         MivotInstance errInstance = new MivotInstance(Glossary.ModelPrefix.MANGO + ":EpochPositionErrors",
@@ -175,16 +180,16 @@ public class MangoInstance extends MivotInstance{
         return mangoObject;
     }
 
-    public String xmlString(boolean withOrigin) throws MappingError {
+    public String xmlString() throws MappingError {
         MivotInstance mangoObject = new MivotInstance("mango:MangoObject", null, dmid);
 
-        if (dmid != null) {
+        if (this.dmid != null) {
             String[] refOrVal = MivotUtils.getRefOrLiteral(dmid);
             String value = refOrVal[0] != null ? refOrVal[0] : refOrVal[1];
             mangoObject.addAttribute("mango:MangoObject.identifier", Glossary.IvoaType.STRING, value, null);
         }
 
-        if (withOrigin) {
+        if (this.withOrigin) {
             mangoObject.addReference("mango:MangoObject.queryOrigin", "_origin");
         }
 
@@ -194,6 +199,6 @@ public class MangoInstance extends MivotInstance{
         }
 
         mangoObject.addCollection("mango:MangoObject.propertyDock", serialized);
-        return mangoObject.xmlString(false);
+        return mangoObject.xmlString();
     }
 }

@@ -14,6 +14,8 @@ public class InstancesFromModels {
     private MangoObject mangoInstance;
     private MivotAnnotations annotation;
 
+	private boolean sparseMode=false;
+
     public InstancesFromModels(String dmid) {
         this.mangoInstance = new MangoObject(dmid);
         this.annotation = new MivotAnnotations();
@@ -173,7 +175,10 @@ public class InstancesFromModels {
         return dmid;
     }
     
-    public void packIntoVotable(String reportMsg, boolean sparse) throws Exception {
+    public void steSparseMode(boolean yesOrNo) {
+    	this.sparseMode = yesOrNo;
+    }
+    public void packIntoVotable(String reportMsg) throws Exception {
         // Default to empty string if reportMsg is null
         if (reportMsg == null) {
             reportMsg = "";
@@ -182,10 +187,10 @@ public class InstancesFromModels {
         // Set the report tag
         annotation.setReport(true, reportMsg);
 
-        if (sparse) {
+        if (this.sparseMode) {
             // Add each individual property to the TEMPLATES block
             for (MivotInstance prop : mangoInstance.getMangoProperties()) {
-                annotation.addTemplates(prop.xmlString(false));
+                annotation.addTemplates(prop.xmlString());
             }
         } else {
             // Add the packed MangoObject to the TEMPLATES block
