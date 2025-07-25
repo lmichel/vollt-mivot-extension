@@ -122,7 +122,7 @@ public class Glossary {
          * VODML URLs of the supported models.
          */
         public static final String IVOA = "https://www.ivoa.net/xml/VODML/IVOA-v1.vo-dml.xml";
-        public static final String MANGO = "https://raw.githubusercontent.com/ivoa-std/MANGO/refs/heads/wd-v1.0/vo-dml/mango.vo-dml.xml";
+        public static final String MANGO = "https://ivoa.net/xml/MANGO/MANGO-V1.vodml.xml";
         public static final String PHOT = "https://ivoa.net/xml/VODML/Phot-v1.vodml.xml";
         public static final String COORDS = "https://ivoa.net/xml/VODML/Coords-v1.vo-dml.xml";
         public static final String MEAS = "https://ivoa.net/xml/VODML/Meas-v1.vo-dml.xml";

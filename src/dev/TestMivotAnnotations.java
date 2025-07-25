@@ -70,13 +70,13 @@ public class TestMivotAnnotations {
 		// Build the annotations
 		MivotAnnotations mivotAnnotation = new MivotAnnotations();
 		mivotAnnotation.addDefaultSpaceFrame();
-		MangoInstance mi = new MangoInstance("_not_implemented_yet_");
+		MangoInstance mi = new MangoInstance("main_id");
 
 		if (MAPPING_CACHE.getTableMapping(table, "mango:EpochPosition").isEmpty() == false) {
 			EpochPosition epochPosition = new EpochPosition(MAPPING_CACHE, table, columns);
 			mi.addMangoProperties(epochPosition);
 			mivotAnnotation.addModel("mango",
-					"https://raw.githubusercontent.com/ivoa-std/MANGO/refs/heads/wd-v1.0/vo-dml/mango.vo-dml.xml");
+					"https://ivoa.net/xml/MANGO/MANGO-V1.vodml.xml");
 		}
 
 		mivotAnnotation.addTemplates(mi);

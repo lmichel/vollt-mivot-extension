@@ -134,7 +134,7 @@ public class MangoInstance extends MivotInstance{
     }
 
     public String xmlString() throws MappingError {
-        MivotInstance mangoObject = new MivotInstance("mango:MangoObject", null, dmid);
+        MivotInstance mangoObject = new MivotInstance("mango:MangoObject", null, null);
 
         if (this.dmid != null) {
             String[] refOrVal = MivotUtils.getRefOrLiteral(dmid);
