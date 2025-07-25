@@ -69,17 +69,23 @@ public class TestMivotAnnotations {
 
 		// Build the annotations
 		MivotAnnotations mivotAnnotation = new MivotAnnotations();
+		// space frale is hard-coed meanwhile knowing how to get it from the TAP_SCHEMA
 		mivotAnnotation.addDefaultSpaceFrame();
+		
+		// Build the MANGO instance with the column used as identifier
 		MangoInstance mi = new MangoInstance("main_id");
 
 		if (MAPPING_CACHE.getTableMapping(table, "mango:EpochPosition").isEmpty() == false) {
 			EpochPosition epochPosition = new EpochPosition(MAPPING_CACHE, table, columns);
 			mi.addMangoProperties(epochPosition);
-			mivotAnnotation.addModel("mango",
+			mivotAnnotation.addModel(
+					"mango",
 					"https://ivoa.net/xml/MANGO/MANGO-V1.vodml.xml");
+			mivotAnnotation.addTemplates(mi);
+		} else {
+			mivotAnnotation.setReport(false, "No mapping rules for the EpochPosition in table " + table);
 		}
 
-		mivotAnnotation.addTemplates(mi);
 		mivotAnnotation.buildMivotBlock("", false);
 		System.out.println(mivotAnnotation.mivotBlock);
 	}
