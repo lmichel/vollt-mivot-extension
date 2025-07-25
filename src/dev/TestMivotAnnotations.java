@@ -69,12 +69,13 @@ public class TestMivotAnnotations {
 
 		// Build the annotations
 		MivotAnnotations mivotAnnotation = new MivotAnnotations();
-		// space frale is hard-coed meanwhile knowing how to get it from the TAP_SCHEMA
+		// space frame is hard-coed meanwhile knowing how to get it from the TAP_SCHEMA
 		mivotAnnotation.addDefaultSpaceFrame();
 		
 		// Build the MANGO instance with the column used as identifier
 		MangoInstance mi = new MangoInstance("main_id");
 
+		// Look for mapping rules for EpochPosition in the current table
 		if (MAPPING_CACHE.getTableMapping(table, "mango:EpochPosition").isEmpty() == false) {
 			EpochPosition epochPosition = new EpochPosition(MAPPING_CACHE, table, columns);
 			mi.addMangoProperties(epochPosition);
