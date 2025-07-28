@@ -44,4 +44,14 @@ public class MappingCache {
 		}
 		return tableMapping;
 	}
+	
+	public  String getUtypeMappedColumn(String adqlTableName, String utype) {
+		for( UtypeDecoder utypeDecoder: this.getTableMapping(adqlTableName).values()) {
+			if( utypeDecoder.getUtype().equals(utype)) {
+				return utypeDecoder.getTapColumn().getADQLName();
+			}
+		}
+		return null;
+
+	}
 }

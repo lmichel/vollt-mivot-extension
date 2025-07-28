@@ -1,9 +1,7 @@
 package main.annoter.meta;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,8 +60,6 @@ public class UtypeDecoder {
 	}
 	
 	private boolean processSimpleRole() {
-        String input = "mango:EpochPosition.errors";
-
         Pattern pattern = Pattern.compile("^" + SIMPLE_ROLE + "$");
         Matcher matcher = pattern.matcher(this.utype);
 
@@ -143,6 +139,9 @@ public class UtypeDecoder {
 	}
 	public TAPColumn getTapColumn() {
 		return this.tapColumn;
+	}
+	public String getUtype() {
+		return this.utype;
 	}
 	public String toString() {
 		return "utype=" + this.utype + "\n instanceNumber=" + this.instanceNumber 
