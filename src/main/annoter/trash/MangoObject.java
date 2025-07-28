@@ -1,18 +1,23 @@
-package main.annoter.pyvocode;
+package main.annoter.trash;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class MangoInstance extends MivotInstance{
+import main.annoter.dm.Glossary;
+import main.annoter.dm.Property;
+import main.annoter.mivot.MappingError;
+import main.annoter.mivot.MivotInstance;
+import main.annoter.utils.MivotUtils;
+
+public class MangoObject {
 
     private final List<Property> properties = new ArrayList<>();
     private final String dmid;
-    private boolean withOrigin=false;
+    private boolean withOrigin = false;
 
-    public MangoInstance(String dmid) throws MappingError {
-    	super("mango:MangoObject");
+    public MangoObject(String dmid) {
         this.dmid = dmid;
     }
 
@@ -33,9 +38,22 @@ public class MangoInstance extends MivotInstance{
     public List<Property>getMangoProperties(){
     	return this.properties;
     }
-    
-    public void addMangoProperties(Property property){
-    	this.properties.add(property);
+    private MivotInstance buildEpochErrors(Map<String, Map<String, Object>> errors) throws MappingError {
+        MivotInstance errInstance = new MivotInstance(Glossary.ModelPrefix.MANGO + ":EpochPositionErrors",
+        		Glossary.ModelPrefix.MANGO + ":EpochPosition.errors", null);
+
+        for (Map.Entry<String, Map<String, Object>> entry : errors.entrySet()) {
+            String role = entry.getKey();
+            Map<String, Object> mapping = entry.getValue();
+            String errorClass = (String) mapping.get("class");
+
+            if (Glossary.Roles.EPOCH_POSITION_ERRORS.contains(role) &&
+                    Arrays.asList("PErrorSym2D", "PErrorSym1D", "PErrorAsym1D").contains(errorClass)) {
+                errInstance.addInstance(getErrorInstance(errorClass,
+                		Glossary.ModelPrefix.MANGO + ":EpochPositionErrors." + role, mapping));
+            }
+        }
+        return errInstance;
     }
 
     private MivotInstance buildEpochDate(Map<String, Object> mapping) throws MappingError {
@@ -54,7 +72,6 @@ public class MangoInstance extends MivotInstance{
         datetimeInstance.addAttribute(Glossary.IvoaType.DATETIME, Glossary.ModelPrefix.MANGO + ":DateTime.dateTime", value, null);
         return datetimeInstance;
     }
-
 
     public Property addBrightnessProperty(String filterId, Map<String, Object> mapping, Map<String, String> semantics) throws MappingError {
         Property magInstance = new Property(Glossary.ModelPrefix.MANGO + ":Brightness", null, null, semantics);
@@ -132,11 +149,15 @@ public class MangoInstance extends MivotInstance{
 
         return mangoObject;
     }
+    
+    public void includeOrigin(boolean yesOrNo) {
+    	this.withOrigin = yesOrNo;
+    }
 
-    public String xmlString() throws MappingError {
-        MivotInstance mangoObject = new MivotInstance("mango:MangoObject", null, null);
+    public String toXml() throws MappingError {
+        MivotInstance mangoObject = new MivotInstance("mango:MangoObject", null, dmid);
 
-        if (this.dmid != null) {
+        if (dmid != null) {
             String[] refOrVal = MivotUtils.getRefOrLiteral(dmid);
             String value = refOrVal[0] != null ? refOrVal[0] : refOrVal[1];
             mangoObject.addAttribute("mango:MangoObject.identifier", Glossary.IvoaType.STRING, value, null);

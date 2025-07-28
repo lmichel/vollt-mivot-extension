@@ -1,4 +1,4 @@
-package main.annoter.pyvocode;
+package main.annoter.mivot;
 
 /**
  * Exception raised if a Resource or MIVOT element can't be mapped for one of these reasons:

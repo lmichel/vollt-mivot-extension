@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import adql.db.DefaultDBTable;
-import main.annoter.pyvocode.EpochPosition;
-import main.annoter.pyvocode.MangoInstance;
-import main.annoter.pyvocode.MappingCache;
-import main.annoter.pyvocode.MivotAnnotations;
+import main.annoter.dm.EpochPosition;
+import main.annoter.dm.MangoInstance;
+import main.annoter.meta.MappingCache;
+import main.annoter.mivot.MivotAnnotations;
 import tap.metadata.TAPColumn;
 
 public class TestMivotAnnotations {
@@ -41,7 +41,7 @@ public class TestMivotAnnotations {
 		tapColumns.add(new TAPColumn("pm_err_angle", "description", "deg", "ucd",
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle"));
 
-		MAPPING_CACHE = new MappingCache();
+		MAPPING_CACHE = MappingCache.getCache();
 		for (TAPColumn tapColumn : tapColumns) {
 			tapColumn.setTable(new DefaultDBTable("basic", "basic"));
 			MAPPING_CACHE.addTAPColumn(tapColumn);
@@ -87,7 +87,7 @@ public class TestMivotAnnotations {
 			mivotAnnotation.setReport(false, "No mapping rules for the EpochPosition in table " + table);
 		}
 
-		mivotAnnotation.buildMivotBlock("", false);
+		mivotAnnotation.buildMivotBlock("");
 		System.out.println(mivotAnnotation.mivotBlock);
 	}
 

@@ -1,30 +1,38 @@
-package main.annoter.pyvocode;
+package main.annoter.meta;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import main.annoter.UtypeDecoder;
 import tap.metadata.TAPColumn;
 
 public class MappingCache {
-	Map<String, Map<String, UtypeDecoder>> cache;
+	private Map<String, Map<String, UtypeDecoder>> utypeMap;
+    private static MappingCache CACHE;
+    
+    
+	private MappingCache() {
+		this.utypeMap = new LinkedHashMap<String, Map<String, UtypeDecoder>>();
+	}
 	
-	public MappingCache() {
-		this.cache = new LinkedHashMap<String, Map<String, UtypeDecoder>>();
+	public static MappingCache getCache(){
+		if( CACHE == null ) {
+			CACHE = new MappingCache();
+		}
+		return CACHE;
 	}
 	public void addTAPColumn(TAPColumn tapColumn) {
 		String tableName = tapColumn.getTable().getADQLName();
-		if( this.cache.containsKey(tableName) == false ) {
-			this.cache.put(tableName, new LinkedHashMap<String, UtypeDecoder>());
+		if( this.utypeMap.containsKey(tableName) == false ) {
+			this.utypeMap.put(tableName, new LinkedHashMap<String, UtypeDecoder>());
 		}
 		UtypeDecoder utypeDecoder = new UtypeDecoder(tapColumn);
-		this.cache.get(tableName).put(tapColumn.getADQLName(), utypeDecoder);
+		this.utypeMap.get(tableName).put(tapColumn.getADQLName(), utypeDecoder);
 	}
 	
 	public Map<String, UtypeDecoder> getTableMapping(String adqlTableName){
-		return this.cache.get(adqlTableName);
+		return this.utypeMap.get(adqlTableName);
 	}
 	
 	public List<UtypeDecoder> getTableMapping(String adqlTableName, String hostClass){

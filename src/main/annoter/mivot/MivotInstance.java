@@ -1,7 +1,10 @@
-package main.annoter.pyvocode;
+package main.annoter.mivot;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import main.annoter.utils.MivotUtils;
+import main.annoter.utils.XmlUtils;
 
 /**
  * Java equivalent of the Python class MivotInstance.
@@ -60,6 +63,26 @@ public class MivotInstance {
             xml.append("ref=\"").append(ref).append("\" ");
         }
         xml.append("/>");
+        content.add(xml.toString());
+    }
+    public void addAttribute(String dmtype, String dmrole, Double value, String unit) throws MappingError {
+        if (dmtype == null || dmtype.isEmpty()) {
+            throw new MappingError("Cannot add an attribute without dmtype");
+        }
+        if (dmrole == null || dmrole.isEmpty()) {
+            throw new MappingError("Cannot add an attribute without dmrole");
+        }
+
+
+        StringBuilder xml = new StringBuilder();
+        xml.append("<ATTRIBUTE dmtype=\"").append(dmtype)
+           .append("\" dmrole=\"").append(dmrole).append("\" ");
+        if (unit != null && !"None".equals(unit)) {
+            xml.append("unit=\"").append(unit).append("\" ");
+        }
+
+        xml.append("value=\"").append(value).append("\" ");
+         xml.append("/>");
         content.add(xml.toString());
     }
 

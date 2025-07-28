@@ -1,4 +1,4 @@
-package main.annoter;
+package main.annoter.meta;
 
 import java.util.ArrayList;
 import java.util.HashMap;

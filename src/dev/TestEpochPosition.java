@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import adql.db.DefaultDBTable;
-import main.annoter.pyvocode.EpochPosition;
-import main.annoter.pyvocode.MappingCache;
-import main.annoter.pyvocode.MappingError;
+import main.annoter.dm.EpochPosition;
+import main.annoter.meta.MappingCache;
+import main.annoter.mivot.MappingError;
 import tap.metadata.TAPColumn;
 
 public class TestEpochPosition {
@@ -43,7 +43,7 @@ public class TestEpochPosition {
 				"description", "deg", "ucd",
 				"mango:EpochPosition.longitude[CS.spaceSys=ICRS]"));
 		
-		MappingCache mappingCache = new MappingCache();
+		MappingCache mappingCache = MappingCache.getCache();
 		for( TAPColumn tapColumn: tapColumns) {
 			tapColumn.setTable(new DefaultDBTable("ma_table", "ma_table"));
 			mappingCache.addTAPColumn(tapColumn);

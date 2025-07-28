@@ -2,8 +2,8 @@ package dev;
 
 import java.io.IOException;
 
-import main.annoter.pyvocode.MappingError;
-import main.annoter.pyvocode.MivotInstance;
+import main.annoter.mivot.MappingError;
+import main.annoter.mivot.MivotInstance;
 
 public class TestMivotInstance {
 

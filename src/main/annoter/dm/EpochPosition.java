@@ -1,7 +1,7 @@
 /**
  * Commented by chatGPT 
  */
-package main.annoter.pyvocode;
+package main.annoter.dm;
 
 
 import java.util.ArrayList;
@@ -9,7 +9,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import main.annoter.UtypeDecoder;
+import main.annoter.meta.MappingCache;
+import main.annoter.meta.UtypeDecoder;
+import main.annoter.mivot.MappingError;
+import main.annoter.mivot.MivotInstance;
 import tap.metadata.TAPColumn;
 
 /**
@@ -22,11 +25,6 @@ public class EpochPosition extends Property {
 	// Type de données MANGO
 	public static final String DMTYPE = "mango:EpochPosition";
 
-	// Liste des attributs pris en compte dans cette propriété
-	public static final List<String> ATTRIBUTES = Arrays.asList(
-		"latitude", "longitude", "pmLatitude", "pmLongitude",
-		"properMotion", "radialVelocity", "parallax"
-	);
 
 	// Liste des frames de coordonnées spatiales utilisées
 	public List<String> frames;
@@ -39,15 +37,18 @@ public class EpochPosition extends Property {
 	 * @param selectedColumns  Liste des colonnes sélectionnées
 	 * @throws MappingError    En cas d'erreur dans le mappage
 	 */
+	@SuppressWarnings("serial")
 	public EpochPosition(MappingCache mappingCache, String tableName, List<String> selectedColumns)
 			throws MappingError {
 
 		// Appel au constructeur de la classe mère Property
-		super(DMTYPE, null, null, new HashMap<String, String>() {{
+		super(DMTYPE, null, null, new HashMap<String, String>() {
+			{
 			put("description", "6 parameters position");
 			put("uri", "https://www.ivoa.net/rdf/uat/2024-06-25/uat.html#astronomical-location");
 			put("label", "Astronomical location");
-		}});
+			}
+		});
 
 		// Récupère les colonnes mappables de la table pour le DMTYPE
 		List<UtypeDecoder> mappableColumns = mappingCache.getTableMapping(tableName, DMTYPE);
@@ -61,7 +62,7 @@ public class EpochPosition extends Property {
 			this.frames = mappableColumn.getFrames();
 
 			// Vérifie que l'attribut est reconnu et que la colonne a été sélectionnée
-			if (ATTRIBUTES.contains(attribute) && selectedColumns.contains(adqlName)) {
+			if (Glossary.Roles.EPOCH_POSITION.contains(attribute) && selectedColumns.contains(adqlName)) {
 				this.addAttribute("ivoa:RealQuantity", DMTYPE + "." + attribute, adqlName, tapColumn.getUnit());
 
 				// Recherche la frame spatiale (spaceSys)
@@ -73,6 +74,10 @@ public class EpochPosition extends Property {
 			}
 		}
 
+		MivotInstance obsDate = new MivotInstance("mango:ObsDate", "mango:EpochPosition.obsDate", null);
+		obsDate.addAttribute("ivoa:string","mango:DateTime.representation", "*year", null);
+		obsDate.addAttribute("ivoa:datetime","mango:DateTime.dateTime", 2000.0, null);
+		this.addInstance(obsDate);
 		// Ajoute les éventuelles erreurs associées à l'époque
 		MivotInstance erri = this.buildEpochErrors(mappingCache, tableName, selectedColumns);
 		if (erri != null) {

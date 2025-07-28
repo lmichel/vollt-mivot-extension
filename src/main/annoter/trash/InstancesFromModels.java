@@ -1,11 +1,15 @@
-package main.annoter.pyvocode;
+package main.annoter.trash;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.logging.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
+
+import main.annoter.dm.Glossary;
+import main.annoter.mivot.MivotAnnotations;
+import main.annoter.mivot.MivotInstance;
+import main.annoter.utils.MivotUtils;
+import main.annoter.utils.XmlUtils;
 
 public class InstancesFromModels {
 
@@ -199,7 +203,7 @@ public class InstancesFromModels {
         }
 
         // Finalize the MIVOT block and insert into the VOTable
-        annotation.buildMivotBlock("", false);
+        annotation.buildMivotBlock("");
     }
 
 }

@@ -1,15 +1,12 @@
-package main.annoter.pyvocode;
+package main.annoter.mivot;
 
 import java.util.*;
 import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.w3c.dom.Document;
+import main.annoter.dm.Glossary;
+import main.annoter.utils.XmlUtils;
 
 public class MivotAnnotations {
-    private static final Logger logger = Logger.getLogger(MivotAnnotations.class.getName());
-
     private Map<String, String> models;
     private boolean reportStatus;
     private String reportMessage;
@@ -140,7 +137,7 @@ public class MivotAnnotations {
         return sb.toString();
     }
 
-    public void buildMivotBlock(String templatesId, boolean schemaCheck) throws Exception {
+    public void buildMivotBlock(String templatesId) throws Exception {
         if (templatesId != null) {
             this.templatesId = templatesId;
         }
@@ -154,10 +151,6 @@ public class MivotAnnotations {
         sb.append("</VODML>");
 
         this.mivotBlock = XmlUtils.prettyString(sb.toString()).replaceAll("\n\\s*\n", "\n");
-
-        if (schemaCheck) {
-            checkXml();
-        }
     }
 
     public void addTemplates(Object instance) throws Exception {
@@ -194,21 +187,6 @@ public class MivotAnnotations {
         if (!status) {
             globals.clear();
             templates.clear();
-        }
-    }
-
-    public void checkXml() throws Exception {
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            dbFactory.setNamespaceAware(true);
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(new java.io.ByteArrayInputStream(mivotBlock.getBytes()));
-
-            // Schema validation could be added here (e.g., using javax.xml.validation.Schema)
-            // This is a placeholder for schema validation logic.
-            logger.info("XML parsed successfully (schema validation not implemented).");
-        } catch (Exception e) {
-            throw new Exception("XML validation failed: " + e.getMessage());
         }
     }
 }

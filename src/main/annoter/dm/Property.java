@@ -1,6 +1,9 @@
-package main.annoter.pyvocode;
+package main.annoter.dm;
 
 import java.util.Map;
+
+import main.annoter.mivot.MappingError;
+import main.annoter.mivot.MivotInstance;
 
 public class Property extends MivotInstance {
 

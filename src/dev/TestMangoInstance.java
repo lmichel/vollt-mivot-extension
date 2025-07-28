@@ -2,8 +2,8 @@ package dev;
 
 import java.io.IOException;
 
-import main.annoter.pyvocode.MangoInstance;
-import main.annoter.pyvocode.MappingError;
+import main.annoter.dm.MangoInstance;
+import main.annoter.mivot.MappingError;
 
 public class TestMangoInstance {
 
