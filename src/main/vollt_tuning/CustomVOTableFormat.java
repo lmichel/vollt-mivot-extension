@@ -86,9 +86,11 @@ public class CustomVOTableFormat extends VOTableFormat {
 		try {
 			mivotAnnotation.buildMivotBlock("");
 			out.write(mivotAnnotation.mivotBlock);
+			out.flush();
 		} catch (Exception e) {
+			// TODO Put a logger message here
 			mivotAnnotation.setReport(false, "Mapping process failed" + e.toString());
-		}
+		} 
 	}
 	
 	private boolean isQueryMappable() {
