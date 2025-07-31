@@ -1,6 +1,8 @@
 package main.annoter.dm;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Glossary {
 
@@ -139,6 +141,36 @@ public class Glossary {
         public static final List<String> OBS_DATE = Arrays.asList("time.epoch;obs;stat.mean", "time.epoch;obs");
         public static final List<String> PARALLAX = Arrays.asList("pos.parallax.trig");
         public static final String RADIAL_VELOCITY = "spect.dopplerVeloc.opt";  // single string, not list
+    }
+    
+    public static class Filters {
+        /**
+         * SVO Identifiers off the filters referenced by Simbad
+         * The list is obtained by this TAP query: 
+         *     SELECT distinct"public".filter.filtername,"public".filter.description
+         *     FROM "public".filter
+         *     
+         * Empty SVO ids mean the band is valid (simbad) but there is no associated SVO id
+         */
+        static public Map<String, String> map = new LinkedHashMap<>();
+
+        static {
+            map.put("K", "2MASS/2MASS.Ks/Vega");
+            map.put("H", "2MASS/2MASS.H/Vega");
+            map.put("R", "");
+            map.put("J", "2MASS/2MASS.J/Vega");
+            map.put("V", "");
+            map.put("B", "");
+            map.put("I", "");
+            map.put("u", "SLOAN/SDSS.u/Vega");
+            map.put("r", "SLOAN/SDSS.r/Vega");
+            map.put("z", "SLOAN/SDSS.z/Vega");
+            map.put("g", "SLOAN/SDSS.g/Vega");
+            map.put("G", "GAIA/GAIA3.G/Vega");
+            map.put("F444W", "JWST/NIRCam.F444W/Vega");
+            map.put("F150W", "JWST/NIRCam.F150W/Vega");
+            map.put("F200W", "JWST/NIRCam.F200W/Vega");
+        }
     }
 }
 
