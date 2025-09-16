@@ -7,12 +7,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import main.annoter.trash.InstancesFromModels;
+import main.annoter.mivot.MivotAnnotations;
 import main.annoter.utils.MivotUtils;
 import main.annoter.utils.XmlUtils;
 
 public class PhotCal {
-    private static final Logger LOGGER = Logger.getLogger(InstancesFromModels.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MivotAnnotations.class.getName());
 
     private static String extractDescription(String xml) {
         // Simple regex extraction in Java, or XML parsing.

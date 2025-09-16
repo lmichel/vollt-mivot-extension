@@ -18,3 +18,4 @@ gradle-app.setting
 .settings
 .classpath
 /bin/
+.*gradle

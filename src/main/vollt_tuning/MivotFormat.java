@@ -9,11 +9,15 @@ import tap.TAPExecutionReport;
 import tap.data.TableIterator;
 import tap.formatter.OutputFormat;
 
-public class MangoFormat implements OutputFormat {
+/**
+ * Connect the VOtable formator that can process annotation with the RESPONSE parameter 
+ * equals to "application/x-votable+xml;content=mivot" or "mivot" (nickname). 
+ */
+public class MivotFormat implements OutputFormat {
 
-	CustomVOTableFormat votFmt;
-	public MangoFormat(ServiceConnection service) {
-		votFmt=new CustomVOTableFormat(service);
+	MivotVOTableFormat votFmt;
+	public MivotFormat(ServiceConnection service) {
+		votFmt=new MivotVOTableFormat(service);
 	}
 	
 	@Override
@@ -25,7 +29,7 @@ public class MangoFormat implements OutputFormat {
 	@Override
 	public String getShortMimeType() {
 		// TODO Auto-generated method stub
-		return "mango";
+		return "mivot";
 	}
 
 	@Override
