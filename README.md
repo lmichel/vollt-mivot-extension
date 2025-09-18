@@ -13,11 +13,17 @@ The project has been designed to annotate TAP Simbad responses.
 
 ## Annotation activation
 
-- The query response annoter is invoked if `RESPONSEFORMAT=application/x-votable+xml;content=mivot`
+- The annoter works as a add-on of the vollt instance.
+- The annoter classes must be first exported to the host Web application.
+    - Compile the project
+    - Build a jaR
+    - Place it in `WEB-INF/lib`
+- Set the Utypes in the `TAP_SCHEMA/columns` table following yhe examples given in `./src/sql`
+- The query response annoter is invoked if `RESPONSEFORMAT=application/x-votable+xml;content=mivot` or `RESPONSEFORMAT=mivot`
 - This Mime type is defined in `main.vollt_tuning.MangotFormat`
    - It embeds a custom formator: `main.vollt_tuning.CustomVOTableFormat`
    - The custom formator inserts the annotations in between the header write out and the data write out. 
-- This class is declared in `tap.property` that way: `output_formats={main.vollt_tuning.MangoFormat}, fits, csv, tsv, text, html, json`
+- This class must be declared in `WEB-INF/tap.property` that way: `output_formats={main.vollt_tuning.MangoFormat}, fits, csv, tsv, text, html, json`
 
 ## Model mapped
 
