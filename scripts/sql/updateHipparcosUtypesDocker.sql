@@ -1,5 +1,4 @@
-CREATE SCHEMA IF NOT EXIST hip;
-ALTER TABLE hipparcos SET SCHEMA hip;
+ALTER TABLE IF EXISTS  "hip".hipparcos SET SCHEMA "public";
 
 UPDATE "TAP_SCHEMA".columns SET utype = 'mango:MangoObject.identifier' WHERE columns.column_name = 'hip';
 UPDATE "TAP_SCHEMA".columns SET utype = 'mango:EpochPosition.latitude[CS.spaceSys=ICRS]' WHERE columns.column_name = 'ra';

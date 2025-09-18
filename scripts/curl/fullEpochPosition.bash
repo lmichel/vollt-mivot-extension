@@ -1,4 +1,4 @@
-curl "http://localhost:8888/vollt-mivot-extension/sync" \
+curl "http://localhost:8889/vollt-mivot-extension/sync" \
       -d FORMAT="mivot" \
       -d REQUEST="doQuery" \
       -d LANG="ADQL" \
