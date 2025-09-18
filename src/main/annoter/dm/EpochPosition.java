@@ -5,7 +5,6 @@ package main.annoter.dm;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,7 +59,6 @@ public class EpochPosition extends Property {
 			TAPColumn tapColumn = mappableColumn.getTapColumn();
 			String adqlName = tapColumn.getADQLName();
 			this.frames = mappableColumn.getFrames();
-
 			// Vérifie que l'attribut est reconnu et que la colonne a été sélectionnée
 			if (Glossary.Roles.EPOCH_POSITION.contains(attribute) && selectedColumns.contains(adqlName)) {
 				this.addAttribute("ivoa:RealQuantity", DMTYPE + "." + attribute, adqlName, tapColumn.getUnit());
@@ -101,6 +99,7 @@ public class EpochPosition extends Property {
 		List<UtypeDecoder> mappableColumns = mappingCache.getTableMapping(tableName, DMTYPE);
 		List<UtypeDecoder> positionUtypes = new ArrayList<>();
 		List<UtypeDecoder> pmUtypes = new ArrayList<>();
+		List<UtypeDecoder> parallaxUtypes = new ArrayList<>();
 
 		// Filtrage des erreurs de type position et properMotion
 		for (UtypeDecoder mappableColumn : mappableColumns) {
@@ -115,12 +114,19 @@ public class EpochPosition extends Property {
 				if ("properMotion".equals(mappableColumn.getInnerRole())) {
 					pmUtypes.add(mappableColumn);
 				}
+				if ("parallax".equals(mappableColumn.getInnerRole())) {
+					parallaxUtypes.add(mappableColumn);
+				}
 			}
 		}
 
+		if( positionUtypes.isEmpty() && pmUtypes.isEmpty() && parallaxUtypes.isEmpty()) {
+			return null;
+		}
 		// Création de l'instance principale d'erreur
 		MivotInstance errorInstance = new MivotInstance(
-			positionUtypes.isEmpty() ? pmUtypes.get(0).getInnerClass() : positionUtypes.get(0).getInnerClass(),
+			//positionUtypes.isEmpty() ? pmUtypes.get(0).getInnerClass() : positionUtypes.get(0).getInnerClass(),
+			"mango:EpochPositionErrors",
 			DMTYPE + ".errors",
 			null
 		);
@@ -137,6 +143,13 @@ public class EpochPosition extends Property {
 		// Ajoute les erreurs de mouvement propre si présentes
 		if (!pmUtypes.isEmpty()) {
 			MivotInstance pmError = this.buildFlatInstance("mango:EpochPositionErrors.properMotion", pmUtypes);
+			errorInstance.addInstance(pmError);
+			mapped = true;
+		}
+
+		// Ajoute les erreurs de parallax si présentes
+		if (!parallaxUtypes.isEmpty()) {
+			MivotInstance pmError = this.buildFlatInstance("mango:EpochPositionErrors.parallax", parallaxUtypes);
 			errorInstance.addInstance(pmError);
 			mapped = true;
 		}

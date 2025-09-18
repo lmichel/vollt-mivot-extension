@@ -1,0 +1,8 @@
+<Context>
+	<Resource name="jdbc/myDatasource" auth="Container"
+			type="javax.sql.DataSource"
+			driverClassName="org.postgresql.Driver"
+	 
+			url="jdbc:postgresql://localhost:2345/hipparcos" username="postgres" password="pg_hip_1234"
+			/>
+</Context>

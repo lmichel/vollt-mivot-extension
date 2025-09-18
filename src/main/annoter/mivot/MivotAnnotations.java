@@ -1,11 +1,13 @@
 package main.annoter.mivot;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import main.annoter.dm.Glossary;
 import main.annoter.utils.XmlUtils;
 
+/**
+ * Collect all annotation components and put them together to build the annotation block (as a String)
+ */
 public class MivotAnnotations {
     private Map<String, String> models;
     private boolean reportStatus;
@@ -137,6 +139,12 @@ public class MivotAnnotations {
         return sb.toString();
     }
 
+    /**
+     * Build a complete MIVOT blocks from all element stored in the current instance
+     * 
+     * @param templatesId ID of the mapped table (optional) The first table is taken if null
+     * @throws Exception
+     */
     public void buildMivotBlock(String templatesId) throws Exception {
         if (templatesId != null) {
             this.templatesId = templatesId;
@@ -153,6 +161,12 @@ public class MivotAnnotations {
         this.mivotBlock = XmlUtils.prettyString(sb.toString()).replaceAll("\n\\s*\n", "\n");
     }
 
+    /**
+     * Add a MIVOT element in TEMPLATES
+     * 
+     * @param instance MivotInstance or string serialization of an instance 
+     * @throws Exception
+     */
     public void addTemplates(Object instance) throws Exception {
         if (instance instanceof MivotInstance) {
             MivotInstance mi = (MivotInstance) instance;
@@ -165,6 +179,12 @@ public class MivotAnnotations {
         }
     }
 
+    /**
+     * Add a MIVOT element in GLOBALS
+     * 
+     * @param instance MivotInstance or string serialization of an instance 
+     * @throws Exception
+     */
     public void addGlobals(Object instance) throws Exception {
         if (instance instanceof MivotInstance) {
             MivotInstance mi = (MivotInstance) instance;
@@ -177,10 +197,22 @@ public class MivotAnnotations {
         }
     }
 
+    /**
+     * Add a <MODEL> element
+     * 
+     * @param name model name, this used as VODML prefix
+     * @param url points on the model VODML file
+     */
     public void addModel(String name, String url) {
         models.put(name, url);
     }
 
+    /**
+     * @param status mapping status (must be OK or FAILED)
+     * @param message report message (free text)
+     * 
+     *  @TODO Write a logger message when status is false
+     */
     public void setReport(boolean status, String message) {
         this.reportStatus = status;
         this.reportMessage = message;

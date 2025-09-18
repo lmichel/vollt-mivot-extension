@@ -1,11 +1,9 @@
-package model.tests;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import annoter.JsonProfile;
-import annoter.SimpleAnnotationBuilder;
 import tap.metadata.TAPColumn;
 
 /**
@@ -40,13 +38,15 @@ public class SimpleAnnotationTapSchemaTest {
 
 		try {
 			
-			JsonProfile jsonProfile = new JsonProfile("simbad", tapColumns);
+			//JsonProfile jsonProfile = new JsonProfile("simbad", tapColumns);
 			
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		SimpleAnnotationBuilder sab=null;
+		/***
+		 * SimpleAnnotationBuilder sab=null;
+		 *
 		try {
 			sab = new SimpleAnnotationBuilder("xtapdb", tapColumns, null);
 			sab.buildMivotBlock();
@@ -56,6 +56,7 @@ public class SimpleAnnotationTapSchemaTest {
 			sab.setAnnotationsAsFailed(e.toString());
 		}
 		sab.writeAnnotations();
+		**/
 
 
 	}

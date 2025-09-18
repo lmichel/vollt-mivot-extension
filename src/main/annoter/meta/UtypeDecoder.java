@@ -7,6 +7,25 @@ import java.util.regex.Pattern;
 
 import tap.metadata.TAPColumn;
 
+/**
+ * UTypes can have 2 forms: 
+ * - hostClass.hostAttribute
+ *   - ex mango:EpochPosition.parallax
+ *   - the parallax field of the EpochPosition class
+ *   
+ * - hostClass.hostAttribute.innerRole/innerClass.innerAttribute
+ *   - ex mango:EpochPosition.errors.parallax/mango:error.PErrorSym1D.sigma1
+ *   - the sigma1 attribute of parallax component of the EpochPosition.error instance.
+ *     The parallew component is instance of mango:error.PErrorSym1D.
+ * 
+ * UTypes can be followed by [CS=id CT=value] where
+ * - CS refers to a coordinate systems whichapply to the column.
+ *   The interpretation of id is hard coded in the tool. (not implemented yet)
+ * - CT refers to a literal value that comes in addition to the filed mapping
+ *   ex: CT=year in the case of an ObsDate will make the date representation as a year format
+ *   The way to process this extra field is hard coded in the tool. (not implemented yet) 
+ * 
+ */
 public class UtypeDecoder {
 	private TAPColumn tapColumn;
 	private String utype;

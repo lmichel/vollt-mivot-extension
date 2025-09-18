@@ -1,0 +1,1 @@
+PGPASSWORD=pg_hip_1234 psql -p 2345 -h localhost -U postgres  -f "/home/michel/gitRepositories/vollt-mivot-extension/scripts/sql/updateUtypes.sql"  hipparcos
