@@ -8,6 +8,8 @@ import java.util.List;
 import adql.db.DBColumn;
 import adql.db.DefaultDBTable;
 import adql.query.ADQLQuery;
+import adql.query.from.ADQLTable;
+import adql.query.from.FromContent;
 import main.annoter.dm.EpochPosition;
 import main.annoter.dm.Glossary;
 import main.annoter.dm.MangoInstance;
@@ -64,8 +66,8 @@ public class MivotVOTableFormat extends VOTableFormat {
 		try {
 			ADQLQuery parsedQuery = this.service.getFactory().createADQLParser().parseQuery(query);
 			tableName = parsedQuery.getFrom().getName();
-			
-			if( this.isQueryMappable(parsedQuery) == true ) {
+			StringBuffer message = new StringBuffer();
+			if( this.isQueryMappable(parsedQuery, message) == true ) {
 				this.service.getLogger().log(LogLevel.INFO, "MIVOT", "Start writing annotations for table " + tableName, null);
 
 				MappingCache mappingCache = MappingCache.getCache();
@@ -93,7 +95,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 				}
 				mivotAnnotation.addTemplates(mi);
 			} else {
-				mivotAnnotation.setReport(false, "No mappable column can be identified ");
+				mivotAnnotation.setReport(false, "No mappable column can be identified: " + message);
 			}
 		} catch (Exception e1) {
 			this.service.getLogger().log(LogLevel.ERROR, "MIVOT", "Annotation process failed: " + e1, null);
@@ -117,8 +119,19 @@ public class MivotVOTableFormat extends VOTableFormat {
 	 * Returns true if the query is considered as providing a mappable result
 	 * @TODO refine the criteria 
 	 */
-	private boolean isQueryMappable(ADQLQuery parsedQuery) {
-		return parsedQuery.getFrom().getTables().size() == 1;
+	private boolean isQueryMappable(ADQLQuery parsedQuery, StringBuffer message) {
+		FromContent from = parsedQuery.getFrom();
+		if( from.getTables().size() != 1 ) {
+			message.append("Annotation on multi-table queries not implemented yet");
+			return false;
+		}
+		String schema =  from.getTables().get(0).getSchemaName().toLowerCase();
+		if( schema.indexOf("tap_schema") != -1 ) {
+			message.append("Queries on TAP_SCHEMA cannot be annotated");
+			return false;
+		}
+
+		return true;
 	}
 
 }
