@@ -1,15 +1,15 @@
 package dev;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import adql.db.DefaultDBTable;
 import main.annoter.dm.EpochPosition;
 import main.annoter.meta.MappingCache;
 import main.annoter.mivot.MappingError;
 import tap.metadata.TAPColumn;
+import tap.metadata.TAPTable;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TestEpochPosition {
 
@@ -44,8 +44,9 @@ public class TestEpochPosition {
 				"mango:EpochPosition.longitude[CS.spaceSys=ICRS]"));
 		
 		MappingCache mappingCache = MappingCache.getCache();
+        final TAPTable table = new TAPTable("ma_table", TAPTable.TableType.table);
 		for( TAPColumn tapColumn: tapColumns) {
-			tapColumn.setTable(new DefaultDBTable("ma_table", "ma_table"));
+			table.addColumn(tapColumn);
 			mappingCache.addTAPColumn(tapColumn);
 		}
 		

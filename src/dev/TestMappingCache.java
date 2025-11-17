@@ -1,12 +1,12 @@
 package dev;
 
+import main.annoter.meta.MappingCache;
+import tap.metadata.TAPColumn;
+import tap.metadata.TAPTable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import adql.db.DefaultDBTable;
-import main.annoter.meta.MappingCache;
-import tap.metadata.TAPColumn;
 
 public class TestMappingCache {
 
@@ -31,8 +31,9 @@ public class TestMappingCache {
 		
 		
 		MappingCache mappingCache = MappingCache.getCache();
-		for( TAPColumn tapColumn: tapColumns) {
-			tapColumn.setTable(new DefaultDBTable("ma_table", "ma_table"));
+        final TAPTable table = new TAPTable("ma_table", TAPTable.TableType.table);
+        for( TAPColumn tapColumn: tapColumns) {
+			table.addColumn(tapColumn);
 			mappingCache.addTAPColumn(tapColumn);
 		}
 		System.out.println(mappingCache.getTableMapping("ma_table", "mango:EpochPosition"));

@@ -1,12 +1,12 @@
 package main.annoter.meta;
 
+import tap.metadata.TAPColumn;
+import tap.metadata.TAPTable;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import adql.db.DefaultDBTable;
-import tap.metadata.TAPColumn;
 
 /**
  * Collect along with the Tomcat time of life all mapped columns adn provides methods telling
@@ -130,8 +130,9 @@ public class MappingCache {
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle"));
 
 		MappingCache cache = MappingCache.getCache();
-		for (TAPColumn tapColumn : tapColumns) {
-			tapColumn.setTable(new DefaultDBTable("basic", "basic"));
+        final TAPTable basicTable = new TAPTable("basic", TAPTable.TableType.table);
+        for (TAPColumn tapColumn : tapColumns) {
+			basicTable.addColumn(tapColumn);
 			cache.addTAPColumn(tapColumn);
 		}
 	}

@@ -1,16 +1,15 @@
 package dev;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import adql.db.DefaultDBTable;
 import main.annoter.dm.EpochPosition;
 import main.annoter.dm.MangoInstance;
 import main.annoter.meta.MappingCache;
-import main.annoter.meta.UtypeDecoder;
 import main.annoter.mivot.MivotAnnotations;
 import tap.metadata.TAPColumn;
+import tap.metadata.TAPTable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TestMivotAnnotations {
 	private static MappingCache MAPPING_CACHE;
@@ -45,8 +44,9 @@ public class TestMivotAnnotations {
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle"));
 
 		MAPPING_CACHE = MappingCache.getCache();
+        final TAPTable basicTable = new TAPTable("basic", TAPTable.TableType.table);
 		for (TAPColumn tapColumn : tapColumns) {
-			tapColumn.setTable(new DefaultDBTable("basic", "basic"));
+			basicTable.addColumn(tapColumn);
 			MAPPING_CACHE.addTAPColumn(tapColumn);
 		}
 	}
