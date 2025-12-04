@@ -29,6 +29,16 @@ public class Glossary {
         /**
          * Accepted roles for all implemented classes
          */
+        public static final List<String> BRIGHTNESS = Arrays.asList(
+                "value"
+            );
+        public static final List<String> BRIGHTNESS_ERROR = Arrays.asList(
+                "value"
+            );
+
+        /**
+         * Accepted roles for all implemented classes
+         */
         public static final List<String> EPOCH_POSITION = Arrays.asList(
             "longitude",
             "latitude",
@@ -172,5 +182,7 @@ public class Glossary {
             map.put("F200W", "JWST/NIRCam.F200W/Vega");
         }
     }
+    
+    public static String FILTER_ROLE ="Phot:PhotCal.photometryFilter";
 }
 

@@ -3,6 +3,7 @@ package main.annoter.mivot;
 import java.util.*;
 
 import main.annoter.dm.Glossary;
+import main.annoter.dm.PhotCal;
 import main.annoter.utils.XmlUtils;
 
 /**
@@ -46,6 +47,26 @@ public class MivotAnnotations {
     		this.dmids.add(dmid);
     	}
     }
+    
+    public void addPhoCal(String photalID) throws Exception {
+        this.addGlobals(PhotCal.getMivotPhotCal(photalID));
+    }
+    
+    public void addSpaceSys(String spaceframeID) throws Exception {
+    	if( spaceframeID == null  ) {
+			return;
+		}
+    	String[] components = spaceframeID.replace(")", "").split("\\(");
+    	String frame = components[0];
+    	String equinox = null;
+    	if( components.length == 2 ){
+    		equinox = components[1];
+    	} else if( components.length > 2 ){
+    		throw new MappingError("Invalid PhotCal space frame: " + spaceframeID);
+    	}
+    	this.addSimpleSpaceFrame(frame, "BARYCENTER", equinox, null);
+    }
+    
     
     public String addDefaultSpaceFrame() throws Exception {
     	return this.addSimpleSpaceFrame(null, null, null, null);

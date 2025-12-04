@@ -50,7 +50,7 @@ public class TestEpochPosition {
 			mappingCache.addTAPColumn(tapColumn);
 		}
 		
-		EpochPosition epochPosition = new EpochPosition(mappingCache, "ma_table",
+		EpochPosition epochPosition = new EpochPosition("ma_table",
 				Arrays.asList("columnName_21", "columnName_22", "columnName_23", "columnName_5", "columnName_4"));
 		System.out.println(epochPosition.xmlString());
 	}

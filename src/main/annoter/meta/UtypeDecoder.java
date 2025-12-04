@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import main.annoter.mivot.MappingError;
 import tap.metadata.TAPColumn;
 
 /**
@@ -35,14 +36,16 @@ public class UtypeDecoder {
 	private String innerRole;
 	private String innerClass;
 	private String innerAttribute;
-	private  List<String> frames = new ArrayList<String>();
-	private  List<String> constants = new ArrayList<String>();
+	private String constantAndFrames;
+	private List<String> frames = new ArrayList<String>();
+	private List<String> constants = new ArrayList<String>();
 	
 	String CLASS_NAME = "[A-Z][\\w]+";
 	String PACKAGE= "[a-z][a-z0-9_]+";
 	String FIELD = "[a-z][a-zA-Z0-9_]+";
 	String SIMPLE_ROLE = "(" + PACKAGE + ":" + "(?:" + PACKAGE + "\\.)?" + CLASS_NAME + ")\\.(" + FIELD + ")";
 	String COMPOUND =  "^" + SIMPLE_ROLE + "\\.(" + FIELD + ")\\/" + SIMPLE_ROLE + "$";
+	String SHORT_COMPOUND =  "^" + SIMPLE_ROLE + "\\/" + SIMPLE_ROLE + "$";
 
 	public UtypeDecoder(TAPColumn tapColumn ){
 		this.tapColumn = tapColumn;
@@ -50,7 +53,9 @@ public class UtypeDecoder {
 		String[] eles = utype.split(":");
 
 		this.extractConstantsAndFrames();
-		if( this.processSimpleRole() == false && this.processCompound() == false ) {
+		System.out.println(this.processSimpleRole());
+		System.out.println(this.processCompound());
+    	if( this.processSimpleRole() == false && this.processCompound() == false ) {
 			System.out.println("UTYPE not valid: " + this.utype);
 			System.exit(1);
 		}  else {
@@ -100,26 +105,39 @@ public class UtypeDecoder {
             this.innerRole = matcher.group(3);
             this.innerClass = matcher.group(4);
             this.innerAttribute =  matcher.group(5);
+            return true;
         } else {
-            return false;
+        	
+            pattern = Pattern.compile(this.SHORT_COMPOUND);
+            matcher = pattern.matcher(this.utype);
+            if (matcher.find()) {
+                this.hostClass =  matcher.group(1);
+                this.hostAttribute = matcher.group(2);
+                this.innerRole = matcher.group(2);
+                this.innerClass = matcher.group(3);
+                this.innerAttribute =  matcher.group(4);
+                return true;
+            }
+
         }
-        return true;
+        return false;
     }
 
 	private void extractConstantsAndFrames() {
         String input = "prefix text [CS.name=John CT.age=30]";
         input = this.utype;
-        String regex = "([^\\[]*)(\\[(C(?:S|T)\\.\\w+=\\w+\\s?)+\\])?";
-
+        String cs_regexp =  "[a-zA-Z0-9\\./]";
+        String regex = "([^\\[]*)(\\[(C(?:S|T)\\.\\w+="+ cs_regexp + "+\\s?)+\\])";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
 
         if (matcher.matches()) {
             this.utype = matcher.group(1).trim();
 
-            String bracketedBlock = matcher.group(2);
-            if (bracketedBlock != null) {
-                Matcher innerMatcher = Pattern.compile("C(?:S|T)\\.\\w+=\\w+").matcher(bracketedBlock);
+            this.constantAndFrames = matcher.group(2);
+            System.out.println("=====Extracting constants and frames from utype: " + this.constantAndFrames);
+            if (this.constantAndFrames != null) {
+                Matcher innerMatcher = Pattern.compile("C(?:S|T)\\.\\w+=\\w+").matcher(this.constantAndFrames);
                 while (innerMatcher.find()) {
                 	String match = innerMatcher.group();
                 	if( match.startsWith("CS")) {
@@ -153,6 +171,14 @@ public class UtypeDecoder {
 	public List<String> getFrames() {
 		return this.frames;
 	}
+	public String getFrame(String label) {
+		for( String frame: this.frames) {
+			if( frame.startsWith(label + "=") ){
+				return(frame.replace(label + "=", ""));
+			}
+		}
+		return null;
+	}
 	public List<String> getConstants() {
 		return this.constants;
 	}
@@ -162,6 +188,9 @@ public class UtypeDecoder {
 	public String getUtype() {
 		return this.utype;
 	}
+	public String getConstantAndFrames() {
+		return this.constantAndFrames;
+	}
 	public String toString() {
 		return "utype=" + this.utype + "\n instanceNumber=" + this.instanceNumber 
 				+ "\n hostClass=" + this.hostClass + "\n hostAttribute=" + this.hostAttribute 
@@ -169,4 +198,11 @@ public class UtypeDecoder {
 				+ "\n frames=" + this.frames + "\n constants=" + this.constants;
 	}
 
+	public void checkInnerClass(List<UtypeDecoder> utypeDecoders) throws MappingError {
+		for(UtypeDecoder utypeDecoder: utypeDecoders) {
+			if( this.innerClass.equals(utypeDecoder.getInnerClass()) == false ) {
+				throw new MappingError("Unconsistant class: " + this.innerClass + " and " + utypeDecoder.getInnerClass());
+			}
+		}
+	}
 }

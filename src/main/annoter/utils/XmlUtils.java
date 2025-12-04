@@ -57,4 +57,16 @@ public class XmlUtils {
         }
         return prettyXml.toString();
     }
+    
+    public static String nodeToString(Node node) throws Exception {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(node), new StreamResult(writer));
+
+        return prettyString(writer.toString());
+    }
+
 }

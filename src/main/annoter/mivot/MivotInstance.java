@@ -98,7 +98,7 @@ public class MivotInstance {
 
     public void addInstance(MivotInstance instance) throws MappingError {
         if (instance == null) {
-            throw new MappingError("Instance added must be of type MivotInstance");
+            throw new MappingError("Instance added must cannot be null");
         }
         content.add(instance.xmlString());
     }

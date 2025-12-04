@@ -22,7 +22,7 @@ public class TestUtypeDecoder {
 		
 		tapColumns.add(new TAPColumn("columnName_3",
 				"description", "unit", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorSym2D.sigma1[CS.spaceSys=ICRS]"));
+				"mango:Brightness.error/mango:error.PErrorSym1D.sigma1[CS.photcal=K]"));
 		
 		for( TAPColumn tapColumn: tapColumns) {
 			UtypeDecoder utd = new UtypeDecoder(tapColumn);

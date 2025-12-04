@@ -14,33 +14,22 @@ import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 import tap.metadata.TAPColumn;
 
-/**
- * Représente une position d'époque astronomique (EpochPosition)
- * avec ses paramètres (latitude, longitude, mouvements propres, etc.)
- * ainsi que les éventuelles erreurs associées.
- */
 public class EpochPosition extends Property {
 
-	// Type de données MANGO
 	public static final String DMTYPE = "mango:EpochPosition";
-
-
-	// Liste des frames de coordonnées spatiales utilisées
 	public List<String> frames;
+	public String csSpaceSys;
+	public String csTimeSys;
+	private String tableName;
+	private List<String> selectedColumns;
+	private List<UtypeDecoder> positionErrorUtypes = new ArrayList<>();
+	private List<UtypeDecoder> pmErrorUtypes = new ArrayList<>();
+	private List<UtypeDecoder> parallaxErrorUtypes = new ArrayList<>();
 
-	/**
-	 * Constructeur principal de l'objet EpochPosition.
-	 *
-	 * @param mappingCache     Le cache de mappage entre colonnes et Utypes
-	 * @param tableName        Le nom de la table TAP
-	 * @param selectedColumns  Liste des colonnes sélectionnées
-	 * @throws MappingError    En cas d'erreur dans le mappage
-	 */
 	@SuppressWarnings("serial")
-	public EpochPosition(MappingCache mappingCache, String tableName, List<String> selectedColumns)
-			throws MappingError {
+	public EpochPosition(String tableName, List<String> selectedColumns)
+			throws Exception {
 
-		// Appel au constructeur de la classe mère Property
 		super(DMTYPE, null, null, new HashMap<String, String>() {
 			{
 			put("description", "6 parameters position");
@@ -48,25 +37,31 @@ public class EpochPosition extends Property {
 			put("label", "Astronomical location");
 			}
 		});
-
-		// Récupère les colonnes mappables de la table pour le DMTYPE
-		List<UtypeDecoder> mappableColumns = mappingCache.getTableMapping(tableName, DMTYPE);
+		MappingCache MAPPING_CACHE = MappingCache.getCache();
+		this.tableName = tableName;
+		this.selectedColumns = selectedColumns;
+		
+		List<UtypeDecoder> mappableColumns = MAPPING_CACHE.getTableMapping(tableName, DMTYPE);
 		String spaceSys = null;
+		String timeSys = null;
 
-		// Parcours les colonnes et ajoute les attributs reconnus
 		for (UtypeDecoder mappableColumn : mappableColumns) {
 			String attribute = mappableColumn.getHostAttribute();
 			TAPColumn tapColumn = mappableColumn.getTapColumn();
 			String adqlName = tapColumn.getADQLName();
 			this.frames = mappableColumn.getFrames();
-			// Vérifie que l'attribut est reconnu et que la colonne a été sélectionnée
+
 			if (Glossary.Roles.EPOCH_POSITION.contains(attribute) && selectedColumns.contains(adqlName)) {
 				this.addAttribute("ivoa:RealQuantity", DMTYPE + "." + attribute, adqlName, tapColumn.getUnit());
 
-				// Recherche la frame spatiale (spaceSys)
 				for (String frame : this.frames) {
 					if (frame.startsWith("spaceSys")) {
 						spaceSys = frame.replace("spaceSys=", "_spaceframe_") + "_BARYCENTER";
+						this.csSpaceSys = frame.replace("spaceSys=", "");
+					}
+					if (frame.startsWith("timeSys")) {
+						timeSys = frame.replace("timeSys=", "_timeframe_") + "_BARYCENTER";
+						this.csTimeSys = frame.replace("timeSys=", "");
 					}
 				}
 			}
@@ -76,102 +71,80 @@ public class EpochPosition extends Property {
 		obsDate.addAttribute("ivoa:string","mango:DateTime.representation", "*year", null);
 		obsDate.addAttribute("ivoa:datetime","mango:DateTime.dateTime", 2000.0, null);
 		this.addInstance(obsDate);
-		// Ajoute les éventuelles erreurs associées à l'époque
-		MivotInstance erri = this.buildEpochErrors(mappingCache, tableName, selectedColumns);
+
+		MivotInstance erri = this.buildEpochErrors();
 		if (erri != null) {
 			this.addInstance(erri);
 		}
 
-		// Ajoute une référence à la frame spatiale si trouvée
 		if (spaceSys != null) {
 			this.addReference(DMTYPE + ".spaceSys", spaceSys);
 		}
+		if (timeSys != null) {
+			this.addReference(DMTYPE + ".timeSys", spaceSys);
+		}
 	}
 
-	/**
-	 * Construit les erreurs associées à la position d'époque.
-	 *
-	 * @return MivotInstance représentant les erreurs, ou null si aucune erreur n'est mappée.
-	 */
-	private MivotInstance buildEpochErrors(MappingCache mappingCache, String tableName, List<String> selectedColumns)
-			throws MappingError {
 
-		List<UtypeDecoder> mappableColumns = mappingCache.getTableMapping(tableName, DMTYPE);
-		List<UtypeDecoder> positionUtypes = new ArrayList<>();
-		List<UtypeDecoder> pmUtypes = new ArrayList<>();
-		List<UtypeDecoder> parallaxUtypes = new ArrayList<>();
+	private MivotInstance buildEpochErrors()
+			throws Exception {
+		MappingCache MAPPING_CACHE = MappingCache.getCache();
 
-		// Filtrage des erreurs de type position et properMotion
+		List<UtypeDecoder> mappableColumns = MAPPING_CACHE.getTableMapping(this.tableName, DMTYPE);
+
 		for (UtypeDecoder mappableColumn : mappableColumns) {
 			String attribute = mappableColumn.getHostAttribute();
 			TAPColumn tapColumn = mappableColumn.getTapColumn();
 			String adqlName = tapColumn.getADQLName();
 
-			if (attribute.equals("errors") && selectedColumns.contains(adqlName)) {
+			if (attribute.equals("errors") && this.selectedColumns.contains(adqlName)) {
 				if ("position".equals(mappableColumn.getInnerRole())) {
-					positionUtypes.add(mappableColumn);
+					mappableColumn.checkInnerClass(positionErrorUtypes);
+					positionErrorUtypes.add(mappableColumn);
 				}
 				if ("properMotion".equals(mappableColumn.getInnerRole())) {
-					pmUtypes.add(mappableColumn);
+					mappableColumn.checkInnerClass(pmErrorUtypes);
+					pmErrorUtypes.add(mappableColumn);
 				}
 				if ("parallax".equals(mappableColumn.getInnerRole())) {
-					parallaxUtypes.add(mappableColumn);
+					mappableColumn.checkInnerClass(parallaxErrorUtypes);
+					parallaxErrorUtypes.add(mappableColumn);
 				}
 			}
 		}
 
-		if( positionUtypes.isEmpty() && pmUtypes.isEmpty() && parallaxUtypes.isEmpty()) {
-			return null;
-		}
-		// Création de l'instance principale d'erreur
 		MivotInstance errorInstance = new MivotInstance(
-			//positionUtypes.isEmpty() ? pmUtypes.get(0).getInnerClass() : positionUtypes.get(0).getInnerClass(),
 			"mango:EpochPositionErrors",
 			DMTYPE + ".errors",
 			null
 		);
 
-		boolean mapped = false;
-
-		// Ajoute les erreurs de position si présentes
-		if (!positionUtypes.isEmpty()) {
-			MivotInstance positionError = this.buildFlatInstance("mango:EpochPositionErrors.position", positionUtypes);
-			errorInstance.addInstance(positionError);
-			mapped = true;
+		boolean errorMapped = false;
+		MivotInstance errorComponent;
+		if( (errorComponent = this.buildErrorComponent("mango:EpochPositionErrors.position",
+				this.positionErrorUtypes) ) != null ) {
+			errorMapped = true;
+			errorInstance.addInstance(errorComponent);
 		}
-
-		// Ajoute les erreurs de mouvement propre si présentes
-		if (!pmUtypes.isEmpty()) {
-			MivotInstance pmError = this.buildFlatInstance("mango:EpochPositionErrors.properMotion", pmUtypes);
-			errorInstance.addInstance(pmError);
-			mapped = true;
+		if( (errorComponent = this.buildErrorComponent("mango:EpochPositionErrors.properMotion",
+				this.pmErrorUtypes) ) != null ) {
+			errorMapped = true;
+			errorInstance.addInstance(errorComponent);
 		}
-
-		// Ajoute les erreurs de parallax si présentes
-		if (!parallaxUtypes.isEmpty()) {
-			MivotInstance pmError = this.buildFlatInstance("mango:EpochPositionErrors.parallax", parallaxUtypes);
-			errorInstance.addInstance(pmError);
-			mapped = true;
+		if( (errorComponent = this.buildErrorComponent("mango:EpochPositionErrors.parallax",
+				this.parallaxErrorUtypes) ) != null ) {
+			errorMapped = true;
+			errorInstance.addInstance(errorComponent);
 		}
-
-		return mapped ? errorInstance : null;
+		return (errorMapped ==  true)? errorInstance: null;
 	}
-
-	/**
-	 * Construit une instance "plate" de type MivotInstance à partir d'une liste d'Utypes.
-	 */
-	private MivotInstance buildFlatInstance(String role, List<UtypeDecoder> utypeList) throws MappingError {
-		MivotInstance flatInstance = new MivotInstance(utypeList.get(0).getInnerClass(), role, null);
-
-		// Ajoute chaque attribut à l'instance plate
-		for (UtypeDecoder mappableColumn : utypeList) {
-			flatInstance.addAttribute(
-				"ivoa:RealQuantity",
-				utypeList.get(0).getInnerClass() + "." + mappableColumn.getInnerAttribute(),
-				mappableColumn.getTapColumn().getADQLName(),
-				mappableColumn.getTapColumn().getUnit()
-			);
+	
+	private MivotInstance buildErrorComponent(String dmrole, List<UtypeDecoder> utypeDecoders)
+			throws Exception {		
+		if (utypeDecoders.isEmpty()) {
+			return null;
 		}
-		return flatInstance;
+		PropertyError errorComponent = new PropertyError(dmrole, null, 0.68, utypeDecoders, null);			
+		return errorComponent.getMivotInstance();
 	}
 }

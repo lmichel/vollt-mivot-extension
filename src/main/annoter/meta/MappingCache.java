@@ -56,15 +56,36 @@ public class MappingCache {
 		return tableMapping;
 	}
 	
-	public List<UtypeDecoder> getTableMapping(String adqlTableName, String hostClass, List<String> selectedColumns){
+	public List<UtypeDecoder> getTableMapping(String adqlTableName, String hostClass, String hostAttribute){
 		List<UtypeDecoder> tableMapping = new ArrayList<UtypeDecoder>();
 		if( this.getTableMapping(adqlTableName) == null ) {
 			return tableMapping;
 		}
 		for( UtypeDecoder utypeDecoder: this.getTableMapping(adqlTableName).values()) {
+			if( utypeDecoder.getHostClass().equals(hostClass) && utypeDecoder.getHostAttribute().equals(hostAttribute)) {
+				tableMapping.add(utypeDecoder);
+			}
+		}
+		return tableMapping;
+	}
+	
+	public Map<String, List<UtypeDecoder>> getTableMapping(String adqlTableName, String hostClass, List<String> selectedColumns){
+		Map<String, List<UtypeDecoder>> tableMapping = new LinkedHashMap<String, List<UtypeDecoder>>();
+		if( this.getTableMapping(adqlTableName) == null ) {
+			return tableMapping;
+		}
+		System.out.println("@@@ Selected columns: " + selectedColumns);
+		for( UtypeDecoder utypeDecoder: this.getTableMapping(adqlTableName).values()) {
 			if( utypeDecoder.getHostClass().equals(hostClass)) {
+				System.out.println("@@@ Checking " + utypeDecoder.getTapColumn().getADQLName());
 				if( selectedColumns.contains(utypeDecoder.getTapColumn().getADQLName()) ) {
-					tableMapping.add(utypeDecoder);
+					System.out.println("@@@ Mapped " + utypeDecoder.getTapColumn().getADQLName());
+					String key = utypeDecoder.getConstantAndFrames();
+					if( key == null) key = "default";
+					if( tableMapping.containsKey(key) == false ) {
+						tableMapping.put(key, new ArrayList<UtypeDecoder>());
+					}
+					tableMapping.get(key).add(utypeDecoder);
 				}
 			}
 		}
@@ -136,4 +157,5 @@ public class MappingCache {
 			cache.addTAPColumn(tapColumn);
 		}
 	}
+	
 }

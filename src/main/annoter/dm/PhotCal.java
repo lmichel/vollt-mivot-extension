@@ -1,42 +1,67 @@
 package main.annoter.dm;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotAnnotations;
 import main.annoter.utils.MivotUtils;
 import main.annoter.utils.XmlUtils;
 
 public class PhotCal {
     private static final Logger LOGGER = Logger.getLogger(MivotAnnotations.class.getName());
-
-    private static String extractDescription(String xml) {
+    private static List<String> PHOTCAL_IDS = new ArrayList<String>();
+    private static List<String> PHOTFILTER_IDS = new ArrayList<String>();
+    
+    private static String extractFPSErrorDescription(String xml) {
         // Simple regex extraction in Java, or XML parsing.
         int start = xml.indexOf("<DESCRIPTION>") + 13;
         int end = xml.indexOf("</DESCRIPTION>");
         return xml.substring(start, end).trim();
     }
 
-    public static String addPhotCal(String filterSimbadName) throws Exception {
+    private static String getSVOId(String filterName) throws MappingError {
+    	if(filterName.length() == 1) {
+    		String filter = Glossary.Filters.map.get(filterName);
+        	if( filter == null || filter.length() == 0 ) {
+        		throw new MappingError("No filter name found for abreviation " + filterName);
+        	}
+        	return filter;
+		} else {
+			return filterName;
+		}
+	}
+    
+    public static String getFPSResponse(String svoId) throws MalformedURLException, IOException, MappingError {
     	
-    	String svoId = Glossary.Filters.map.get(filterSimbadName);
-    	if( svoId == null || svoId.length() == 0 ) {
-    		return "";
-    	}
         String fpsUrl = Glossary.Url.FPS + svoId;
         HttpURLConnection connection = (HttpURLConnection) new URL(fpsUrl).openConnection();
         connection.setRequestMethod("GET");
 
         int httpCode = connection.getResponseCode();
         if (httpCode != 200) {
-            LOGGER.severe("FPS service error: " + httpCode);
-            return null;
+    		connection.disconnect(); 
+    		throw new MappingError("FPS service error: " + httpCode);
         }
-
         InputStream is = connection.getInputStream();
         StringBuilder responseBuilder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -46,28 +71,127 @@ public class PhotCal {
             }
         }
         String response = responseBuilder.toString();
+		connection.disconnect(); 
 
         if (response.contains("<INFO name=\"QUERY_STATUS\" value=\"ERROR\">")) {
-            String message = extractDescription(response);
-            throw new Exception("FPS service error: " + message);
+            String message = extractFPSErrorDescription(response);
+            throw new MappingError("FPS service error: " + message);
         }
-
-        String calId = MivotUtils.formatDmid(filterSimbadName);
+        return response;
+    }
+    
+    public static String getMivotPhotCal(String filterName) throws Exception {
+    	
+    	String svoId = getSVOId(filterName);
+        String calId = MivotUtils.formatDmid(filterName);
+        
         String photcalId = "_photcal_" + calId;
         String filterId = "_photfilter_" + calId;
+        
+        if( PHOTCAL_IDS.contains(photcalId) ) {
+			return "";
+		}
 
+        String response = getFPSResponse(svoId);
+ 
         // fix some FPS tweaks
-        //response = XmlUtils.prettyString(response);
         response = response.replace(
             "<ATTRIBUTE dmrole=\"Phot:ZeroPoint.softeningParameter\" dmtype=\"ivoa:real\" value=\"\"/>",
             "<!-- ATTRIBUTE dmrole=\"Phot:ZeroPoint.softeningParameter\"" +
             " dmtype=\"ivoa:real\" value=\"\"/ -->");
-        response = response.replace("Phot:photometryFilter", "Phot:PhotometryFilter");
-        response = response.replace("Phot:PhotCal.photometryFilter.bandwidth",
-                                                          "Phot:PhotometryFilter.bandwidth");
+        response = response.replace(
+        		"Phot:PhotCal.photometryFilter.bandwidth",
+        		"Phot:PhotometryFilter.bandwidth");        
+        response = response.replace(
+        		" dmrole=\"\"",
+        		" dmid=\"" + photcalId + "\"");
         
-        response = response.replace(" dmrole=\"\"", "dmid=\"" + photcalId + "\"");
+        PHOTCAL_IDS.add(photcalId);
+        response = splitFilterReference(response, filterId);
+        
         return XmlUtils.prettyString(response);
     }
+    
+   public static String getMivotPhotFilter(String filterName) throws Exception {
+    	
+    	String svoId = getSVOId(filterName);
+        String calId = MivotUtils.formatDmid(filterName);
+        
+        String filterId = "_photfilter_" + calId;
+        
+        if( PHOTFILTER_IDS.contains(filterId) ) {
+			return "";
+		}
 
+        String response = getFPSResponse(svoId);
+ 
+        // fix some FPS tweaks
+        response = response.replace(
+            "<ATTRIBUTE dmrole=\"Phot:ZeroPoint.softeningParameter\" dmtype=\"ivoa:real\" value=\"\"/>",
+            "<!-- ATTRIBUTE dmrole=\"Phot:ZeroPoint.softeningParameter\"" +
+            " dmtype=\"ivoa:real\" value=\"\"/ -->");
+        response = response.replace(
+        		"Phot:PhotCal.photometryFilter.bandwidth",
+        		"Phot:PhotometryFilter.bandwidth");        
+        
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		InputSource is = new InputSource(new StringReader(response.replace("<?xml version=\"1.0\"?>", "")));
+		Document doc = db.parse(is);
+		PHOTFILTER_IDS.add(filterId);
+		return XmlUtils.nodeToString(findPhotometryFilter(doc)).replace(
+				" dmrole=\"" + Glossary.FILTER_ROLE + "\"",
+				" dmid=\"" + filterId + "\"");
+    }
+    
+    private static String splitFilterReference(String xmlString, String filterId) throws Exception {
+
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		InputSource is = new InputSource(new StringReader(xmlString.replace("<?xml version=\"1.0\"?>", "")));
+		Document doc = db.parse(is);
+		Node photometryFilterNode = findPhotometryFilter(doc);
+		
+		// Remove the photometry filter node
+		Node parentNode = photometryFilterNode.getParentNode();
+		parentNode.removeChild(photometryFilterNode);
+
+		// Create a REFERENCE node
+		Element referenceNode = doc.createElement("REFERENCE");
+		referenceNode.setAttribute("dmid", filterId);
+		referenceNode.setAttribute("dmrole", "Phot:PhotCal.photometryFilter");
+        doc.getElementsByTagName("INSTANCE").item(0).appendChild(referenceNode);
+
+		// Append the REFERENCE node to the parent
+        Comment comment = doc.createComment(" WARNING The photometric system may vary from a data row to another");
+		parentNode.insertBefore(comment, parentNode.getFirstChild());
+		
+        if( PHOTFILTER_IDS.contains(filterId) ) {
+        	return  XmlUtils.nodeToString(parentNode);
+        } else {
+			PHOTFILTER_IDS.add(filterId);
+			return  XmlUtils.nodeToString(parentNode) +
+				"\n" +
+				XmlUtils.nodeToString(photometryFilterNode).replace(
+						" dmrole=\"" + Glossary.FILTER_ROLE + "\"",
+						" dmid=\"" + filterId + "\"");
+        }
+	}
+    
+    private static Node findPhotometryFilter(Document doc) throws Exception {
+        NodeList instanceNodes = doc.getElementsByTagName("INSTANCE");
+        for (int i = 0; i < instanceNodes.getLength(); i++) {
+            Element el = (Element) instanceNodes.item(i);
+
+            if (el.hasAttribute("dmrole")) {
+                String role = el.getAttribute("dmrole");
+                if (role.equals(Glossary.FILTER_ROLE)) {
+                    return el;
+                }
+            }
+        }
+        return null;
+    }
 }
