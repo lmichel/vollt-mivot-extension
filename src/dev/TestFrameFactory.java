@@ -1,0 +1,32 @@
+package dev;
+
+import main.annoter.dm.FrameFactory;
+import main.annoter.dm.FrameHolder;
+import main.annoter.mivot.MappingError;
+
+public class TestFrameFactory {
+
+	public static void main(String[] args) {
+		FrameFactory ff = FrameFactory.getInstance();
+		
+		try {
+			FrameHolder fh = ff.createFrame("space=ICRS(J2000)");
+			System.out.println("Frame ID: " + fh);
+			fh = ff.createFrame("space=ICRS(J2000)");
+			System.out.println("Frame ID: " + fh);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			FrameHolder fh = ff.createFrame("photCal=u");
+			System.out.println("Frame ID: " + fh);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+}

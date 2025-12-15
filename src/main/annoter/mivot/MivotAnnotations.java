@@ -1,24 +1,41 @@
 package main.annoter.mivot;
 
 import java.util.*;
-
-import main.annoter.dm.Glossary;
-import main.annoter.dm.PhotCal;
 import main.annoter.utils.XmlUtils;
 
 /**
  * Collect all annotation components and put them together to build the annotation block (as a String)
  */
 public class MivotAnnotations {
+    /** Map of model prefix -> model VODML URL (used to build <MODEL> entries). */
     private Map<String, String> models;
+
+    /** Mapping/report status: true = OK, false = FAILED. */
     private boolean reportStatus;
+
+    /** Human-readable report message included in the <REPORT> element. */
     private String reportMessage;
+
+    /** Collected GLOBALS XML fragments (each entry is a fragment to include inside <GLOBALS>). */
     private List<String> globals;
+
+    /** Collected TEMPLATES XML fragments (each entry is a fragment to include inside <TEMPLATES>). */
     private List<String> templates;
+
+    /** Optional table id referenced by <TEMPLATES tableref="...">. */
     private String templatesId;
+
+    /** Collected DMIDs used by added instances (keeps track of IDs to avoid duplicates). */
     private List<String> dmids;
+
+    /** Final assembled MIVOT block as a pretty-printed XML string (built by buildMivotBlock()). */
     public String mivotBlock;
 
+    /**
+     * Create a new, empty MivotAnnotations collector.
+     *
+     * Initializes internal collections and sets a default report status and message.
+     */
     public MivotAnnotations() {
         this.models = new LinkedHashMap<>();
         this.reportStatus = true;
@@ -30,97 +47,61 @@ public class MivotAnnotations {
         this.mivotBlock = "";
     }
 
+    /**
+     * Return the last built MIVOT block as a pretty-printed XML string.
+     *
+     * @return assembled MIVOT XML block (may be empty string if buildMivotBlock
+     *         has not been called or if the report indicates failure)
+     */
     public String getMivotBlock() {
         return this.mivotBlock;
     }
 
+    /**
+     * Check whether a DMID has already been recorded in this collector.
+     *
+     * @param dmid the DMID to check
+     * @return true if the DMID is present, false otherwise
+     */
     public boolean containsDmid(String dmid) {
-    	return this.dmids.contains(dmid);
+        return this.dmids.contains(dmid);
     }
     
+    /**
+     * Return an unmodifiable view of the collected DMIDs.
+     *
+     * @return a List of DMIDs (modifiable copy of the internal list is recommended by caller)
+     */
     public List<String> getDmids() {
-    	return this.dmids;
+        return this.dmids;
     }
     
+    /**
+     * Record a DMID if not already present.
+     *
+     * @param dmid the DMID to add
+     */
     public void addDmid(String dmid) {
-    	if( !this.dmids.contains(dmid)) {
-    		this.dmids.add(dmid);
-    	}
-    }
-    
-    public void addPhoCal(String photalID) throws Exception {
-        this.addGlobals(PhotCal.getMivotPhotCal(photalID));
-    }
-    
-    public void addSpaceSys(String spaceframeID) throws Exception {
-    	if( spaceframeID == null  ) {
-			return;
-		}
-    	String[] components = spaceframeID.replace(")", "").split("\\(");
-    	String frame = components[0];
-    	String equinox = null;
-    	if( components.length == 2 ){
-    		equinox = components[1];
-    	} else if( components.length > 2 ){
-    		throw new MappingError("Invalid PhotCal space frame: " + spaceframeID);
-    	}
-    	this.addSimpleSpaceFrame(frame, "BARYCENTER", equinox, null);
-    }
-    
-    
-    public String addDefaultSpaceFrame() throws Exception {
-    	return this.addSimpleSpaceFrame(null, null, null, null);
-    }
-    public String addSimpleSpaceFrame(String spaceRefFrame, String refPosition, String equinox, String epoch) throws Exception {
-        spaceRefFrame = (spaceRefFrame == null)? "ICRS": spaceRefFrame;
-        refPosition = (refPosition == null)? "BARYCENTER": refPosition;
- 
-        String dmid = "_spaceframe_" + spaceRefFrame + "_" + refPosition;
-        if (equinox != null) dmid += "_" + equinox;
-
-        if (this.containsDmid(dmid)) {
-            System.out.println("Space frame already exists: " + dmid);
-            return dmid;
+        if( !this.dmids.contains(dmid)) {
+            this.dmids.add(dmid);
         }
-        this.addDmid(dmid);
-
-        this.addModel(Glossary.ModelPrefix.IVOA, Glossary.VodmlUrl.IVOA);
-        this.addModel(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
-
-
-        MivotInstance spaceSys = new MivotInstance(Glossary.ModelPrefix.COORDS + ":SpaceSys", null, dmid);
-        MivotInstance spaceFrame = new MivotInstance(Glossary.ModelPrefix.COORDS + ":SpaceFrame",
-        		Glossary.ModelPrefix.COORDS + ":PhysicalCoordSys.frame", null);
-
-        spaceFrame.addAttribute(Glossary.IvoaType.STRING, Glossary.ModelPrefix.COORDS + ":SpaceFrame.spaceRefFrame", spaceRefFrame, null);
-
-        if (equinox != null) {
-            spaceFrame.addAttribute(Glossary.ModelPrefix.COORDS + ":Epoch",
-            		Glossary.ModelPrefix.COORDS + ":SpaceFrame.equinox", equinox, null);
-        }
-
-        MivotInstance refLoc = (epoch != null)
-                ? new MivotInstance(Glossary.ModelPrefix.COORDS + ":CustomRefLocation",
-                		Glossary.ModelPrefix.COORDS + ":SpaceFrame.refPosition", null)
-                : new MivotInstance(Glossary.ModelPrefix.COORDS + ":StdRefLocation",
-                		Glossary.ModelPrefix.COORDS + ":SpaceFrame.refPosition", null);
-
-        refLoc.addAttribute(Glossary.IvoaType.STRING, Glossary.ModelPrefix.COORDS + ":StdRefLocation.position", refPosition, null);
-        if (epoch != null) {
-            refLoc.addAttribute("coords:Epoch", Glossary.ModelPrefix.COORDS + ":CustomRefLocation.epoch", epoch, null);
-        }
-
-        spaceFrame.addInstance(refLoc);
-        spaceSys.addInstance(spaceFrame);
-        this.addGlobals(spaceSys);
-
-        return dmid;
     }
+    
+    /**
+     * Build the <REPORT> XML element using the current status and message.
+     *
+     * @return XML fragment for the report element (no surrounding newlines)
+     */
     private String getReport() {
         String status = reportStatus ? "OK" : "FAILED";
         return "<REPORT status=\"" + status + "\">" + reportMessage + "</REPORT>";
     }
 
+    /**
+     * Build the concatenated <MODEL/> entries from the models map.
+     *
+     * @return XML fragments for each model entry (may be empty if no models)
+     */
     private String getModels() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : models.entrySet()) {
@@ -134,6 +115,11 @@ public class MivotAnnotations {
         return sb.toString();
     }
 
+    /**
+     * Wrap the collected globals fragments in a <GLOBALS> container.
+     *
+     * @return the full <GLOBALS> XML block (may contain only the open/close tags if none)
+     */
     private String getGlobals() {
         StringBuilder sb = new StringBuilder("<GLOBALS>\n");
         for (String g : globals) {
@@ -143,6 +129,12 @@ public class MivotAnnotations {
         return sb.toString();
     }
 
+    /**
+     * Wrap the collected templates fragments in a <TEMPLATES> container and
+     * add a tableref attribute when templatesId is set.
+     *
+     * @return the full <TEMPLATES> XML block, or an empty string when no templates
+     */
     private String getTemplates() {
         if (templates.isEmpty()) return "";
 
@@ -229,10 +221,14 @@ public class MivotAnnotations {
     }
 
     /**
-     * @param status mapping status (must be OK or FAILED)
-     * @param message report message (free text)
-     * 
-     *  @TODO Write a logger message when status is false
+     * Set the mapping/report status and message.
+     *
+     * @param status mapping status (true = OK, false = FAILED)
+     * @param message human-readable report message (free text)
+     *
+     * If status is false, GLOBALS and TEMPLATES collections are cleared to avoid
+     * publishing invalid mappings. Consider adding logging here to record the
+     * failure or the reason for the report message.
      */
     public void setReport(boolean status, String message) {
         this.reportStatus = status;

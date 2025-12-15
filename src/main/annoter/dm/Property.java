@@ -1,15 +1,29 @@
 package main.annoter.dm;
 
+import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.Map;
 
+import main.annoter.meta.UtypeDecoder;
 import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 
 public class Property extends MivotInstance {
 
+	private static Class<?>[] paramTypes = new Class<?>[] {
+        List.class,     // List<UtypeDecoder>
+        String.class,   // tableName
+        List.class      // List<FrameHolder>
+	};
+
     public Property(String dmtype) throws MappingError {
         super(dmtype, null, null);
     }
+    
+	public Property(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders) throws MappingError {
+        super(null, null, null);
+	}
+
 
     public Property(String dmtype, String dmrole, String dmid, Map<String, String> semantics) throws MappingError {
         super(dmtype, dmrole, dmid);
@@ -30,4 +44,12 @@ public class Property extends MivotInstance {
             this.addInstance(semanticsInstance);
         }
     }
+    
+	    public static Property getInstance(String className,
+	    		List<UtypeDecoder> utds, String table,
+	    		List<FrameHolder> frameHolders) throws Exception {
+		Class<?> cls = Class.forName("main.annoter.dm." + className);
+		Constructor<?> constructor = cls.getConstructor(paramTypes);
+		return (Property) constructor.newInstance(utds, table, frameHolders);
+	}
 }

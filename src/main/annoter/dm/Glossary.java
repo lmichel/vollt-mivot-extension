@@ -24,7 +24,13 @@ public class Glossary {
         public static final String BOOL = "ivoa:boolean";
         public static final String DATETIME = "ivoa:datetime";
     }
-
+    
+    
+    public static final List<String> SUPPORTED_PROPERTIES  = Arrays.asList(
+            "EpochPosition",
+			"Brightness"
+        );
+      
     public static class Roles {
         /**
          * Accepted roles for all implemented classes
@@ -184,5 +190,20 @@ public class Glossary {
     }
     
     public static String FILTER_ROLE ="Phot:PhotCal.photometryFilter";
+
+    public static class CSClass {
+        /**
+         */
+        public static final String SPACE = "spaceSys";
+        public static final String TIME = "timeSys";
+        public static final String PHOTCAL = "photCal";
+        public static final String LOCAL = "local";
+    }
+    public static class CTClass {
+        /**
+         */
+        public static final String EPOCH = "epoch";
+        public static final String LOCAL = "local";
+    }
 }
 

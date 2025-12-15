@@ -80,13 +80,13 @@ public class PhotCal {
         return response;
     }
     
-    public static String getMivotPhotCal(String filterName) throws Exception {
+    public static String getMivotPhotCal(String filterName, String photcalId, String filterId) throws Exception {
     	
     	String svoId = getSVOId(filterName);
         String calId = MivotUtils.formatDmid(filterName);
         
-        String photcalId = "_photcal_" + calId;
-        String filterId = "_photfilter_" + calId;
+       // String photcalId = "_photCal_" + calId;
+       // String filterId = "_photFilter_" + calId;
         
         if( PHOTCAL_IDS.contains(photcalId) ) {
 			return "";
@@ -114,7 +114,7 @@ public class PhotCal {
     
    public static String getMivotPhotFilter(String filterName) throws Exception {
     	
-    	String svoId = getSVOId(filterName);
+    	String svoId = PhotCal.getSVOId(filterName);
         String calId = MivotUtils.formatDmid(filterName);
         
         String filterId = "_photfilter_" + calId;

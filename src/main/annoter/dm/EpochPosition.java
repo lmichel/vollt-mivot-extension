@@ -18,16 +18,13 @@ public class EpochPosition extends Property {
 
 	public static final String DMTYPE = "mango:EpochPosition";
 	public List<String> frames;
-	public String csSpaceSys;
-	public String csTimeSys;
 	private String tableName;
-	private List<String> selectedColumns;
 	private List<UtypeDecoder> positionErrorUtypes = new ArrayList<>();
 	private List<UtypeDecoder> pmErrorUtypes = new ArrayList<>();
 	private List<UtypeDecoder> parallaxErrorUtypes = new ArrayList<>();
 
 	@SuppressWarnings("serial")
-	public EpochPosition(String tableName, List<String> selectedColumns)
+	public EpochPosition(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders)
 			throws Exception {
 
 		super(DMTYPE, null, null, new HashMap<String, String>() {
@@ -37,51 +34,42 @@ public class EpochPosition extends Property {
 			put("label", "Astronomical location");
 			}
 		});
-		MappingCache MAPPING_CACHE = MappingCache.getCache();
 		this.tableName = tableName;
-		this.selectedColumns = selectedColumns;
 		
-		List<UtypeDecoder> mappableColumns = MAPPING_CACHE.getTableMapping(tableName, DMTYPE);
-		String spaceSys = null;
-		String timeSys = null;
 
-		for (UtypeDecoder mappableColumn : mappableColumns) {
+		String epoch = null;
+		for (UtypeDecoder mappableColumn : utypeDecoders) {
 			String attribute = mappableColumn.getHostAttribute();
 			TAPColumn tapColumn = mappableColumn.getTapColumn();
 			String adqlName = tapColumn.getADQLName();
 			this.frames = mappableColumn.getFrames();
-
-			if (Glossary.Roles.EPOCH_POSITION.contains(attribute) && selectedColumns.contains(adqlName)) {
+			if( mappableColumn.getInnerRole() == null ) {
 				this.addAttribute("ivoa:RealQuantity", DMTYPE + "." + attribute, adqlName, tapColumn.getUnit());
-
-				for (String frame : this.frames) {
-					if (frame.startsWith("spaceSys")) {
-						spaceSys = frame.replace("spaceSys=", "_spaceframe_") + "_BARYCENTER";
-						this.csSpaceSys = frame.replace("spaceSys=", "");
-					}
-					if (frame.startsWith("timeSys")) {
-						timeSys = frame.replace("timeSys=", "_timeframe_") + "_BARYCENTER";
-						this.csTimeSys = frame.replace("timeSys=", "");
-					}
-				}
+			}
+			if( epoch == null ) {
+				epoch = mappableColumn.getConstant(Glossary.CTClass.EPOCH);
 			}
 		}
+	
+		if( epoch != null ) {
+			this.addAttribute("year","mango:EpochPosition.obsDate",
+					"*" + epoch.split("=")[1].replace("J",""),
+					null);
 
-		MivotInstance obsDate = new MivotInstance("mango:ObsDate", "mango:EpochPosition.obsDate", null);
-		obsDate.addAttribute("ivoa:string","mango:DateTime.representation", "*year", null);
-		obsDate.addAttribute("ivoa:datetime","mango:DateTime.dateTime", 2000.0, null);
-		this.addInstance(obsDate);
+		}
 
 		MivotInstance erri = this.buildEpochErrors();
 		if (erri != null) {
 			this.addInstance(erri);
 		}
-
-		if (spaceSys != null) {
-			this.addReference(DMTYPE + ".spaceSys", spaceSys);
-		}
-		if (timeSys != null) {
-			this.addReference(DMTYPE + ".timeSys", spaceSys);
+		
+		for (FrameHolder fh : frameHolders) {
+			if (fh.systemClass.equals(Glossary.CSClass.SPACE)) {
+				this.addReference(DMTYPE + ".spaceSys", fh.frameId);
+			}
+			if (fh.systemClass.equals(Glossary.CSClass.TIME)) {
+				this.addReference(DMTYPE + ".timeSys", fh.frameId);
+			}
 		}
 	}
 
@@ -93,11 +81,7 @@ public class EpochPosition extends Property {
 		List<UtypeDecoder> mappableColumns = MAPPING_CACHE.getTableMapping(this.tableName, DMTYPE);
 
 		for (UtypeDecoder mappableColumn : mappableColumns) {
-			String attribute = mappableColumn.getHostAttribute();
-			TAPColumn tapColumn = mappableColumn.getTapColumn();
-			String adqlName = tapColumn.getADQLName();
-
-			if (attribute.equals("errors") && this.selectedColumns.contains(adqlName)) {
+			if( "errors".equals(mappableColumn.getHostAttribute()) ){
 				if ("position".equals(mappableColumn.getInnerRole())) {
 					mappableColumn.checkInnerClass(positionErrorUtypes);
 					positionErrorUtypes.add(mappableColumn);

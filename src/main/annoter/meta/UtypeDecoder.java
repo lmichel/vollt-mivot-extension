@@ -171,16 +171,24 @@ public class UtypeDecoder {
 	public List<String> getFrames() {
 		return this.frames;
 	}
-	public String getFrame(String label) {
+	public String getFrame(String csClass) {
 		for( String frame: this.frames) {
-			if( frame.startsWith(label + "=") ){
-				return(frame.replace(label + "=", ""));
+			if( frame.startsWith(csClass + "=") ){
+				return(frame);
 			}
 		}
 		return null;
 	}
 	public List<String> getConstants() {
 		return this.constants;
+	}
+	public String getConstant(String ctClass) {
+		for(String constant: this.constants) {
+			if( constant.startsWith(ctClass + "=") ){
+				return(constant);
+			}
+		}
+		return null;
 	}
 	public TAPColumn getTapColumn() {
 		return this.tapColumn;

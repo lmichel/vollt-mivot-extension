@@ -32,7 +32,7 @@ public class Brightness extends Property {
 	public MivotInstance errorInstance = null;
 	
 	@SuppressWarnings("serial")
-	public Brightness(List<UtypeDecoder> utypeDecoders, String tableName)
+	public Brightness(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders)
 			throws Exception {
 
 		super(DMTYPE, null, null, new HashMap<String, String>() {
@@ -59,18 +59,16 @@ public class Brightness extends Property {
 		
 		this.buildErrorInstance();
 
-		if( this.photcal == null ) {
-			throw new MappingError("No photcal frame found for " + this.valueUtypeDecoder.getUtype());
-		}	
-		if( Glossary.Filters.map.get(this.photcal) == null || Glossary.Filters.map.get(this.photcal).equals("") ) {
-			throw new MappingError("Filter " + this.photcal + " is not mapped according to the glossary filters.");
-		}
 		
 		if( this.errorInstance != null ) {
 			this.addInstance(this.errorInstance);
 		}
 		
-		this.addReference(DMTYPE + ".photCal", "_photcal_" + this.photcal);
+		for (FrameHolder fh : frameHolders) {
+			if (fh.systemClass.equals(Glossary.CSClass.PHOTCAL)) {
+				this.addReference(DMTYPE + ".photCal", fh.frameId);
+			}
+		}
 	}
 
 	private void buildErrorInstance() throws Exception {
@@ -103,7 +101,6 @@ public class Brightness extends Property {
 				}
 			}
 		}
-		
 	}
 	public String getPhotCalID() {
 		return this.photcal;

@@ -15,6 +15,7 @@ public class FlatInstance {
 		this.utypeDecoders = utypeDecoders;
 		this.dmid = dmid;
 	}
+	
 	public  MivotInstance getMivotInstance() throws Exception {
 		
 		MivotInstance flatInstance = new MivotInstance(this.utypeDecoders.get(0).getInnerClass(), this.dmrole, this.dmid);
