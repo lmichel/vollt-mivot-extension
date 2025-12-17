@@ -2,8 +2,12 @@ package main.annoter.meta;
 
 import tap.metadata.TAPColumn;
 import tap.metadata.TAPTable;
+import adql.db.DBColumn;
+import adql.db.SearchColumnList;
+import adql.query.from.ADQLTable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +19,7 @@ import java.util.Map;
 public class MappingCache {
 	private Map<String, Map<String, UtypeDecoder>> utypeMap;
     private static MappingCache CACHE;
+    private List<String> storedTables = new ArrayList<String>();
     
     
 	private MappingCache() {
@@ -27,6 +32,44 @@ public class MappingCache {
 		}
 		return CACHE;
 	}
+	
+	public void addTAPTable(TAPTable tapTable) {
+		
+		String tableName = tapTable.getADQLName();
+		if( this.storedTables.contains(tableName)) {
+			return;
+		}
+		this.storedTables.add(tableName);
+
+		Iterator<TAPColumn> it = tapTable.getColumns();
+		while (it.hasNext()) {
+			TAPColumn tapColumn = (TAPColumn) it.next();
+			String uType = tapColumn.getUtype();
+			if (uType != null && uType.startsWith("mango:") ){
+				this.addTAPColumn(tapColumn);
+			}
+		}
+	}
+	public void addADQLTable(ADQLTable tapTable) {
+		
+		String tableName = tapTable.getName();
+		if( this.storedTables.contains(tableName)) {
+			return;
+		}
+		this.storedTables.add(tableName);
+
+		SearchColumnList columnList =  tapTable.getDBColumns();
+		for(DBColumn column: columnList) {
+			if( column instanceof TAPColumn) {
+				TAPColumn tapColumn = (TAPColumn)column;
+				String uType = tapColumn.getUtype();
+				if (uType != null && uType.startsWith("mango:") ){
+					this.addTAPColumn(tapColumn);
+				}
+			}
+		}
+	}
+	
 	public void addTAPColumn(TAPColumn tapColumn) {
 		if( tapColumn.getUtype() == null) {
 			return;

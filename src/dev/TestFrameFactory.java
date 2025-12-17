@@ -1,13 +1,25 @@
 package dev;
 
-import main.annoter.dm.FrameFactory;
-import main.annoter.dm.FrameHolder;
+import main.annoter.mivot.FrameFactory;
+import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MappingError;
 
 public class TestFrameFactory {
 
 	public static void main(String[] args) {
 		FrameFactory ff = FrameFactory.getInstance();
+		
+		try {
+			FrameHolder fh = ff.createFrame("local=SUM_FLAG");
+			System.out.println("Frame ID: " + fh);
+			ff.reset();
+			fh = ff.createFrame("local=SUM_FLAG");
+			System.out.println("Frame ID: " + fh);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.exit(1);
 		
 		try {
 			FrameHolder fh = ff.createFrame("space=ICRS(J2000)");

@@ -3,6 +3,7 @@ package main.annoter.dm;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.annoter.meta.Glossary;
 import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 import main.annoter.utils.MivotUtils;

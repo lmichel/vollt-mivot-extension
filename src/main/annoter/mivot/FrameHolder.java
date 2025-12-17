@@ -1,7 +1,4 @@
-package main.annoter.dm;
-
-import main.annoter.mivot.MappingError;
-import main.annoter.mivot.MivotInstance;
+package main.annoter.mivot;
 
 public class FrameHolder {
 	
