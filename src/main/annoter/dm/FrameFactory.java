@@ -1,5 +1,9 @@
 package main.annoter.dm;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,11 +27,14 @@ public class FrameFactory {
 	private static FrameFactory instance;
 
 	/** Collected frame IDs already created by this factory (prevents duplicates). */
-	private List<String>	ids = new ArrayList<String>();
+	private List<String> ids = new ArrayList<String>();
+
+	private Map<String, FrameHolder> cache = new LinkedHashMap<String, FrameHolder>();
 
 	/** Map of model prefix -> vodml URL used by created frames. */
 	public Map<String, String> models = new LinkedHashMap<String, String>();
 
+	private PhotCalFactory photCal;
 	/**
 	 * Return the singleton instance of the factory.
 	 *
@@ -43,9 +50,15 @@ public class FrameFactory {
 	/**
 	 * Private constructor for the singleton.
 	 */
-	private FrameFactory() {		
+	private FrameFactory() {
+		this.reset();
 	}
 	
+	public void reset() {
+		models = new LinkedHashMap<String, String>();
+		ids = new ArrayList<String>();
+		photCal = new PhotCalFactory();
+	}
 	/**
 	 * Create a FrameHolder from a combined system=frameType string.
 	 *
@@ -72,19 +85,61 @@ public class FrameFactory {
 			 return frameHolder;
 		}
 		
+		if( cache.containsKey(frameId)) {
+			System.out.println("======= cacche0");
+			return cache.get(frameId);
+		}
+				
 		switch(systemClass) {
 		case "space":
 		case Glossary.CSClass.SPACE:
-			this.ids.add(frameId);
-			return this.buildSpaceFrame(frameType, frameId);
+			this.ids.add(frameId);			
+			frameHolder = this.buildSpaceFrame(frameType, frameId);
+			this.storeInCache(frameHolder);
+			return frameHolder;
 		case Glossary.CSClass.PHOTCAL:
 			this.ids.add(frameId);
 			String filterId = frameId.replace("photCal", "photFilter");
 			this.ids.add(filterId);
-			return this.buildPhotCal(frameType, frameId, filterId);
+			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
+			this.storeInCache(frameHolder);
+			return frameHolder;
+		case Glossary.CSClass.LOCAL:
+			this.ids.add(frameId);
+			frameHolder = this.buildLocalFrame(frameType, frameId);
+			this.storeInCache(frameHolder);
+			return frameHolder;
 		default:
 			throw new MappingError("reading CS: Unknown frame type: " + systemClass);
 		}
+	}
+	
+	private void storeInCache(FrameHolder frameHolder) {
+		if(frameHolder.frameXml != null) {
+			System.out.println("======= store " + frameHolder.frameId);
+
+			this.cache.put(frameHolder.frameId, frameHolder);
+		}
+	}
+	
+	private FrameHolder buildLocalFrame(String frameType, String frameId) throws IOException, MappingError {
+		
+		InputStream is = getClass().getClassLoader()
+		        .getResourceAsStream("snippets/mango.frame." + frameType + ".xml");
+
+		byte[] bytes;
+		try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+		    int n;
+		    byte[] data = new byte[4096];
+		    while ((n = is.read(data)) != -1) {
+		        buffer.write(data, 0, n);
+		    }
+		    bytes = buffer.toByteArray();
+		}		
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameId);
+		frameHolder.setFrame(new String(bytes, StandardCharsets.UTF_8));
+		return frameHolder;
+
 	}
 	
 	/**
@@ -156,8 +211,8 @@ public class FrameFactory {
 	 */
 	private FrameHolder buildPhotCal(String frameType, String photcalId, String filterId) throws Exception {
 		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, photcalId);
-
-		frameHolder.setFrame(PhotCal.getMivotPhotCal(frameType, photcalId, filterId));
+		this.photCal.getMivotPhotCal(frameType, photcalId, filterId);
+		frameHolder.setFrame(this.photCal.getMivotPhotCal(frameType, photcalId, filterId));
 		if( this.models.get(Glossary.ModelPrefix.PHOT) == null ) {
 			this.models.put(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
 		}

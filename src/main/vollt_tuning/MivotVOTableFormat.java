@@ -7,6 +7,7 @@ import java.util.List;
 
 import adql.db.DBColumn;
 import adql.db.DefaultDBTable;
+import adql.parser.ParseException;
 import adql.query.ADQLQuery;
 import adql.query.from.ADQLTable;
 import adql.query.from.FromContent;
@@ -20,6 +21,7 @@ import tap.TAPException;
 import tap.TAPExecutionReport;
 import tap.formatter.VOTableFormat;
 import tap.metadata.TAPColumn;
+import tap.metadata.TAPTable;
 import uk.ac.starlink.votable.DataFormat;
 import uk.ac.starlink.votable.VOTableVersion;
 import uws.service.log.UWSLog.LogLevel;
@@ -57,62 +59,46 @@ public class MivotVOTableFormat extends VOTableFormat {
 	 * @param out
 	 */
 	private void writeAnnotations(final TAPExecutionReport execReport, final BufferedWriter out) {
+		MappingCache MAPPING_CACHE = MappingCache.getCache();
+
 		String query = execReport.parameters.getQuery();
 
 		String tableName;
 		List<String> columnNames = new ArrayList<String>();
-		// Build the annotations
-		MivotAnnotations mivotAnnotation = new MivotAnnotations();
+		
+		ADQLQuery parsedQuery = null;
 		try {
-			ADQLQuery parsedQuery = this.service.getFactory().createADQLParser().parseQuery(query);
-			tableName = parsedQuery.getFrom().getName();
-			StringBuffer message = new StringBuffer();
-			if( this.isQueryMappable(parsedQuery, message) == true ) {
-				this.service.getLogger().log(LogLevel.INFO, "MIVOT", "Start writing annotations for table " + tableName, null);
-
-				MappingCache mappingCache = MappingCache.getCache();
-				for(DBColumn col : execReport.resultingColumns) {
-					columnNames.add(col.getADQLName());	
-					mappingCache.addTAPColumn((TAPColumn)col);
-				}
-
-				// space frame is hard-coed meanwhile knowing how to get it from the TAP_SCHEMA
-				mivotAnnotation.addDefaultSpaceFrame();
-				// Build the MANGO instance with the column used as identifier (if any)
-				MangoInstance mi = new MangoInstance(mappingCache.getUtypeMappedColumn(tableName,
-						"mango:MangoObject.identifier", columnNames));
-
-				// Look for mapping rules for EpochPosition in the current table
-				System.out.println(mappingCache.getTableMapping(tableName, "mango:EpochPosition"));
-				if (mappingCache.getTableMapping(tableName, "mango:EpochPosition", columnNames).isEmpty() == false) {
-					EpochPosition epochPosition = new EpochPosition(mappingCache, tableName, columnNames);
-					mi.addMangoProperties(epochPosition);
-					mivotAnnotation.addModel(
-							Glossary.ModelPrefix.MANGO,
-							"https://ivoa.net/xml/MANGO/MANGO-V1.vodml.xml");
-				} else {
-					mivotAnnotation.setReport(false, "No mapping rules for the EpochPosition in table " + tableName);
-				}
-				mivotAnnotation.addTemplates(mi);
-			} else {
-				mivotAnnotation.setReport(false, "No mappable column can be identified: " + message);
-			}
-		} catch (Exception e1) {
-			this.service.getLogger().log(LogLevel.ERROR, "MIVOT", "Annotation process failed: " + e1, null);
-			e1.printStackTrace();
-			mivotAnnotation.setReport(false, "Mapping process failed" + e1.toString());
-
-		}
-		try {
-			// We consider working with the first data table: no need for any table ID
-			mivotAnnotation.buildMivotBlock("");
-			out.write(mivotAnnotation.mivotBlock);
-			out.flush();
-		} catch (Exception e) {
-			// TODO Put a logger message here
+			parsedQuery = this.service.getFactory().createADQLParser().parseQuery(query);
+		} catch (ParseException | TAPException e) {
 			e.printStackTrace();
-			mivotAnnotation.setReport(false, "Mapping process failed: " + e.toString());
-		} 
+			this.writeMappingError(e.toString(), out);
+			return;
+		}
+		tableName = parsedQuery.getFrom().getName();
+		
+		FromContent from = parsedQuery.getFrom();
+		for( ADQLTable tapTable: from.getTables()) {
+			MAPPING_CACHE.addADQLTable(tapTable);
+		}
+
+		StringBuffer message = new StringBuffer();
+		if( this.isQueryMappable(parsedQuery, message) == true ) {
+			
+			this.service.getLogger().log(LogLevel.INFO, "MIVOT", "Start writing annotations for table " + tableName, null);
+
+			for(DBColumn col : execReport.resultingColumns) {
+				columnNames.add(col.getADQLName());	
+			}
+			String outXml = MivotAnnotations.mapMango(tableName, columnNames);
+			try {
+				out.write(outXml);
+				out.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			this.writeMappingError(message.toString(), out);			
+		}
 	}
 	
 	/**
@@ -132,6 +118,21 @@ public class MivotVOTableFormat extends VOTableFormat {
 		}
 
 		return true;
+	}
+	
+	private void writeMappingError(String message, BufferedWriter out) {
+		MivotAnnotations mivotAnnotations = new MivotAnnotations();
+		mivotAnnotations.setReport(false, "Mapping failure: " + message);
+		try {
+			mivotAnnotations.buildMivotBlock("");
+			out.write(mivotAnnotations.mivotBlock);
+			out.flush();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 }
