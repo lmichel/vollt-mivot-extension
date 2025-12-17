@@ -4,10 +4,10 @@ import java.util.*;
 
 import main.annoter.dm.MangoInstance;
 import main.annoter.dm.Property;
-import main.annoter.meta.Glossary;
 import main.annoter.meta.MappingCache;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.utils.XmlUtils;
+import main.annoter.meta.Glossary;
 
 /**
  * Collect all annotation components and put them together to build the
