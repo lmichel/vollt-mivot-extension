@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import main.annoter.meta.UtypeDecoder;
+import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 

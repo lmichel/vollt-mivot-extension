@@ -8,9 +8,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import main.annoter.meta.Glossary;
 import main.annoter.meta.MappingCache;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.meta.UtypeDecoderBrowser;
+import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 import tap.metadata.TAPColumn;
