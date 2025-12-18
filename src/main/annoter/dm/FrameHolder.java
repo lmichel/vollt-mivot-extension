@@ -14,9 +14,11 @@ public class FrameHolder {
 		this.systemClass = systemClass;
 	}
 	
+	@Override
 	public String toString() {
 		return this.systemClass + "/" + frameId + "\n" + ((frameXml == null)? "null": frameXml);
 	}
+	
 	
 	public void setFrame(Object instance) throws MappingError {
 		if( instance instanceof MivotInstance) {
