@@ -10,6 +10,18 @@ public class TestFrameFactory {
 		FrameFactory ff = FrameFactory.getInstance();
 		
 		try {
+			FrameHolder fh = ff.createFrame("filterLow=r");
+			System.out.println("Frame ID: " + fh);
+			ff.reset();
+			fh = ff.createFrame("filterHigh=u");
+			System.out.println("Frame ID: " + fh);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.exit(1);
+		
+		try {
 			FrameHolder fh = ff.createFrame("local=SUM_FLAG");
 			System.out.println("Frame ID: " + fh);
 			ff.reset();
@@ -19,7 +31,7 @@ public class TestFrameFactory {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.exit(1);
+		//System.exit(1);
 		
 		try {
 			FrameHolder fh = ff.createFrame("space=ICRS(J2000)");

@@ -6,6 +6,7 @@ import tap.metadata.TAPTable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TestMappingCache {
@@ -29,6 +30,9 @@ public class TestMappingCache {
 				"description", "unit", "ucd",
 				"mango:EpochPosition.longitude[CS.spaceSys=ICRS]"));
 		
+		tapColumns.add(new TAPColumn("columnName_5",
+				"description", "unit", "ucd",
+				"mango:Color.value[CS.photCalHigh=u CS.photCalLow=r CT.mode=color]"));
 		
 		MappingCache mappingCache = MappingCache.getCache();
         final TAPTable table = new TAPTable("ma_table", TAPTable.TableType.table);
@@ -36,6 +40,7 @@ public class TestMappingCache {
 			table.addColumn(tapColumn);
 			mappingCache.addTAPColumn(tapColumn);
 		}
-		System.out.println(mappingCache.getTableMapping("ma_table", "mango:EpochPosition"));
+		System.out.println(mappingCache.getTableMapping("ma_table", "mango:EpochPosition",  "columnName_4"));
+		System.out.println(mappingCache.getTableMapping("ma_table", "mango:Color", Arrays.asList("columnName_5")));
 	}
 }

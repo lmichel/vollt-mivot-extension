@@ -14,14 +14,18 @@ public class Property extends MivotInstance {
 	private static Class<?>[] paramTypes = new Class<?>[] {
         List.class,     // List<UtypeDecoder>
         String.class,   // tableName
-        List.class      // List<FrameHolder>
+        List.class ,     // List<FrameHolder>
+        List.class ,     // List<String> constants
 	};
 
     public Property(String dmtype) throws MappingError {
         super(dmtype, null, null);
     }
     
-	public Property(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders) throws MappingError {
+	public Property(List<UtypeDecoder> utypeDecoders,
+			String tableName,
+			List<FrameHolder> frameHolders,
+			List<String> constants) throws MappingError {
         super(null, null, null);
 	}
 
@@ -48,9 +52,10 @@ public class Property extends MivotInstance {
     
 	    public static Property getInstance(String className,
 	    		List<UtypeDecoder> utds, String table,
-	    		List<FrameHolder> frameHolders) throws Exception {
+	    		List<FrameHolder> frameHolders,
+	    		List<String> constants) throws Exception {
 		Class<?> cls = Class.forName("main.annoter.dm." + className);
 		Constructor<?> constructor = cls.getConstructor(paramTypes);
-		return (Property) constructor.newInstance(utds, table, frameHolders);
+		return (Property) constructor.newInstance(utds, table, frameHolders, constants);
 	}
 }

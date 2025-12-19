@@ -5,14 +5,16 @@ public class FrameHolder {
 	public String frameId;
 	public String frameXml;
 	public String systemClass;
+	public String systemValue;
 
-	public FrameHolder(String systemClass,  String frameId) {
+	public FrameHolder(String systemClass,  String systemValue, String frameId) {
 		this.frameId = frameId;
 		this.systemClass = systemClass;
+		this.systemValue = systemValue;
 	}
 	
 	public String toString() {
-		return this.systemClass + "/" + frameId + "\n" + ((frameXml == null)? "null": frameXml);
+		return this.systemClass + "<>" + systemValue + "->" + frameId + "\n" + ((frameXml == null)? "null": frameXml);
 	}
 	
 	public void setFrame(Object instance) throws MappingError {

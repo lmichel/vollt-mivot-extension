@@ -28,7 +28,8 @@ public class Glossary {
     
     public static final List<String> SUPPORTED_PROPERTIES  = Arrays.asList(
             "EpochPosition",
-			"Brightness"
+			"Brightness",
+			"Color"
         );
       
     public static class Roles {
@@ -197,6 +198,8 @@ public class Glossary {
         public static final String SPACE = "spaceSys";
         public static final String TIME = "timeSys";
         public static final String PHOTCAL = "photCal";
+        public static final String PHOTFILTERLOW = "filterLow";
+        public static final String PHOTFILTERHIGH = "filterHigh";
         public static final String LOCAL = "local";
     }
     public static class CTClass {

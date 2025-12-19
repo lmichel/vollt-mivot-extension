@@ -23,6 +23,7 @@ public class TestMivotAnnotations {
 	private static MappingCache MAPPING_CACHE;
     public static TAPTable basicTable = new TAPTable("basic", TAPTable.TableType.table);
     public static TAPTable photometryTable = new TAPTable("photometry", TAPTable.TableType.table);
+    public static TAPTable colorTable = new TAPTable("color", TAPTable.TableType.table);
 
 	private static void buildCache() {
 		basicTable.addColumn(new TAPColumn("main_id", "description", "", "ucd",
@@ -68,8 +69,8 @@ public class TestMivotAnnotations {
 		photometryTable.addColumn(new TAPColumn("mag_u_errordown", "description", "mag", "ucd",
 				"mango:Brightness.error/mango:error.PErrorASym1D.low[CS.photCal=u]"));
 		
-		photometryTable.addColumn(new TAPColumn("color_uv", "description", "mag", "ucd",
-				"mango:Color.value[CS.high=u CS.low=v CT.mode=color]"));
+		colorTable.addColumn(new TAPColumn("color_ur", "description", "mag", "ucd",
+				"mango:Color.value[CS.filterLow=u CS.filterHigh=r CT.mode=color]"));
 
 	}
 
@@ -77,7 +78,9 @@ public class TestMivotAnnotations {
 		MAPPING_CACHE = MappingCache.getCache();
 		MAPPING_CACHE.addTAPTable(basicTable);
 		MAPPING_CACHE.addTAPTable(photometryTable);
-		return Arrays.asList("basic", "photometry");
+		MAPPING_CACHE.addTAPTable(colorTable);
+		//return Arrays.asList("basic", "photometry", "color");
+		return Arrays.asList("color");
 
 	}
 
@@ -87,10 +90,10 @@ public class TestMivotAnnotations {
 		//return Arrays.asList("magnitude_u", "mag_error_u", "magnitude_k", "mag_k_error");
 		//return Arrays.asList("magnitude_u", "mag_u_errordown", "mag_u_errorup");
 		//sreturn Arrays.asList("magnitude_u", "mag_u_errorup");
-		//return Arrays.asList("color_uv");
-		return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
-				"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
-				"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
+		return Arrays.asList("color_ur");
+		//return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
+		//		"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
+		//		"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
 
 
 	}

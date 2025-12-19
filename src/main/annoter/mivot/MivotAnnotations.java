@@ -292,14 +292,18 @@ public class MivotAnnotations {
 			frameFactory.reset();
 			for (String supportedProperty : Glossary.SUPPORTED_PROPERTIES) {
 				// Look for mapping rules for the property in the current table
-
+				System.out.println("Processing property: " + supportedProperty);
 				for (String table : tables) {
+					System.out.println(" Checking table: " + table + " " + selectedColumns);
 
-					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(table,
-							"mango:" + supportedProperty, selectedColumns);
+					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
+							table,
+							"mango:" + supportedProperty,
+							selectedColumns);
 					for (String key : propertyMapping.keySet()) {
+						System.out.println(" Found mapping for property " + supportedProperty + " in table " + table
+								+ " with key " + key);
 						List<FrameHolder> frameHolders = new ArrayList<>();
-						System.out.println(supportedProperty + " mapping: " + key);
 						List<UtypeDecoder> utds = propertyMapping.get(key);
 						for (String cs : utds.get(0).getFrames()) {
 							System.out.println(" Creating frame for CS: " + cs);
@@ -309,8 +313,16 @@ public class MivotAnnotations {
 
 							mivotAnnotation.addGlobals(fh.frameXml);
 						}
-						Property property = (Property) Property.getInstance(supportedProperty, utds, table,
-								frameHolders);
+						List<String> constants = new ArrayList<>();
+						for (String ct : utds.get(0).getConstants()) {
+							constants.add(ct);
+						}
+
+						Property property = (Property) Property.getInstance(supportedProperty,
+								utds,
+								table,
+								frameHolders,
+								constants);
 						mi.addMangoProperties(property);
 					}
 				}

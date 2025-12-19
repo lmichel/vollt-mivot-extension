@@ -115,6 +115,7 @@ public class MappingCache {
 	public Map<String, List<UtypeDecoder>> getTableMapping(String adqlTableName, String hostClass, List<String> selectedColumns){
 		Map<String, List<UtypeDecoder>> tableMapping = new LinkedHashMap<String, List<UtypeDecoder>>();
 		if( this.getTableMapping(adqlTableName) == null ) {
+			System.out.println("@@@ No mapping for table " + adqlTableName);
 			return tableMapping;
 		}
 		System.out.println("@@@ Selected columns: " + selectedColumns);
@@ -158,47 +159,5 @@ public class MappingCache {
 			}
 		}
 		return null;
-	}
-	
-	/**
-	 * for test purpose
-	 */
-	private void getFakeMappingCache() {
-		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
-
-		tapColumns.add(new TAPColumn("main_id", "description", "", "ucd",
-				"mango:MangoObject.identifier"));
-		tapColumns.add(new TAPColumn("dec", "description", "deg", "ucd",
-				"mango:EpochPosition.latitude[CS.spaceSys=ICRS]"));
-		tapColumns.add(new TAPColumn("ra", "description", "deg", "ucd",
-				"mango:EpochPosition.longitude[CS.spaceSys=ICRS]"));
-		tapColumns.add(new TAPColumn("pmdec", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.pmLatitude"));
-		tapColumns.add(new TAPColumn("pmra", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.pmLongitude"));
-		tapColumns.add(new TAPColumn("parallax", "description", "mas", "ucd",
-				"mango:EpochPosition.parallax"));
-		tapColumns.add(new TAPColumn("rvz_radvel", "description", "km / s", "ucd",
-				"mango:EpochPosition.radialVelocity"));
-		tapColumns.add(new TAPColumn("coo_err_maja", "description", "mas", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.majorAxis"));
-		tapColumns.add(new TAPColumn("coo_err_mina", "description", "mas", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.minorAxis"));
-		tapColumns.add(new TAPColumn("coo_err_angle", "description", "deg", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.angle"));
-		tapColumns.add(new TAPColumn("pm_err_maja", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.majorAxis"));
-		tapColumns.add(new TAPColumn("pm_err_mina", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.minorAxis"));
-		tapColumns.add(new TAPColumn("pm_err_angle", "description", "deg", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle"));
-
-		MappingCache cache = MappingCache.getCache();
-        final TAPTable basicTable = new TAPTable("basic", TAPTable.TableType.table);
-        for (TAPColumn tapColumn : tapColumns) {
-			basicTable.addColumn(tapColumn);
-			cache.addTAPColumn(tapColumn);
-		}
-	}
-	
+	}	
 }

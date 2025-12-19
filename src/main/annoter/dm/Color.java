@@ -22,10 +22,10 @@ import tap.metadata.TAPColumn;
  * avec ses paramètres (latitude, longitude, mouvements propres, etc.)
  * ainsi que les éventuelles erreurs associées.
  */
-public class Brightness extends Property {
+public class Color extends Property {
 
 	// Type de données MANGO
-	public static final String DMTYPE = "mango:Brightness";
+	public static final String DMTYPE = "mango:Color";
 
 
 	public String photcal;
@@ -34,7 +34,7 @@ public class Brightness extends Property {
 	public MivotInstance errorInstance = null;
 	
 	@SuppressWarnings("serial")
-	public Brightness(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders, List<String> constants)
+	public Color(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders, List<String> constants)
 			throws Exception {
 
 		super(DMTYPE, null, null, new HashMap<String, String>() {
@@ -45,6 +45,17 @@ public class Brightness extends Property {
 			}
 		});
 		this.utypeBrowser = new UtypeDecoderBrowser(utypeDecoders);
+		String mode = null;
+		for( String constant : constants) {
+			String[] parts = constant.split("=");
+			String constantClass = parts[0];
+			String value = parts[1];
+			if( constantClass.equals("mode")) {
+				mode = "*" + value;
+				this.addAttribute("mango.Color.ColorDefinition", "mango:Color.colorDef", mode, null);
+				break;
+			}
+		}
 		
 		this.valueUtypeDecoder = this.utypeBrowser.getUtypeDecoderByHostAttribute("value");
 		if( this.valueUtypeDecoder != null ) {

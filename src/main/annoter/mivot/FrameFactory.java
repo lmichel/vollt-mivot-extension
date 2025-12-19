@@ -77,7 +77,10 @@ public class FrameFactory {
 		String frameType = parts[1];
 
 		String frameId = this.buildID("_".concat(systemClass), frameType);
-		FrameHolder frameHolder = new FrameHolder(systemClass, frameId);
+		frameId = frameId.replace("High", "")
+				.replace("Low", "")
+				.replace("filter", "photCal");
+		FrameHolder frameHolder = new FrameHolder(systemClass, frameType, frameId);
 				
 		if( this.ids.contains(frameId)) {
 			 frameHolder.frameXml = null;
@@ -99,6 +102,14 @@ public class FrameFactory {
 		case Glossary.CSClass.PHOTCAL:
 			this.ids.add(frameId);
 			String filterId = frameId.replace("photCal", "photFilter");
+			this.ids.add(filterId);
+			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
+			this.storeInCache(frameHolder);
+			return frameHolder;
+		case Glossary.CSClass.PHOTFILTERLOW:
+		case Glossary.CSClass.PHOTFILTERHIGH:
+			this.ids.add(frameId);
+			filterId = frameId.replace("photCal", "photFilter");
 			this.ids.add(filterId);
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
 			this.storeInCache(frameHolder);
@@ -135,7 +146,7 @@ public class FrameFactory {
 		    }
 		    bytes = buffer.toByteArray();
 		}		
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameId);
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameType, frameId);
 		frameHolder.setFrame(new String(bytes, StandardCharsets.UTF_8));
 		return frameHolder;
 
@@ -186,7 +197,7 @@ public class FrameFactory {
    
         spaceFrame.addInstance(refLoc);
         spaceSys.addInstance(spaceFrame);
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameId);
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameType, frameId);
 		frameHolder.setFrame(spaceSys);
 		
 		if( this.models.get(Glossary.ModelPrefix.COORDS) == null ) {
@@ -209,7 +220,7 @@ public class FrameFactory {
 	 * @throws Exception on mapping problems
 	 */
 	private FrameHolder buildPhotCal(String frameType, String photcalId, String filterId) throws Exception {
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, photcalId);
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, frameType, photcalId);
 		this.photCal.getMivotPhotCal(frameType, photcalId, filterId);
 		frameHolder.setFrame(this.photCal.getMivotPhotCal(frameType, photcalId, filterId));
 		if( this.models.get(Glossary.ModelPrefix.PHOT) == null ) {

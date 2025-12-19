@@ -26,7 +26,7 @@ public class EpochPosition extends Property {
 	private List<UtypeDecoder> parallaxErrorUtypes = new ArrayList<>();
 
 	@SuppressWarnings("serial")
-	public EpochPosition(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders)
+	public EpochPosition(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders, List<String> constants)
 			throws Exception {
 
 		super(DMTYPE, null, null, new HashMap<String, String>() {
