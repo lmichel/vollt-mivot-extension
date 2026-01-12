@@ -40,15 +40,11 @@ public class PhotCalFactory {
     public String getMivotPhotCal(String filterName, String photcalId, String filterId) throws Exception {
     	
     	if (PHOTCAL_CACHE.containsKey(photcalId) ) {
-    		System.out.println("========= PHOTCAL_CACHE");
+    		System.out.println("========= PHOTCAL_CACHE " + photcalId);
     		return PHOTCAL_CACHE.get(photcalId);
     	}
     	String svoId = getSVOId(filterName);
-        
-    	
-       // String photcalId = "_photCal_" + calId;
-       // String filterId = "_photFilter_" + calId;
-        
+              
         if( PHOTCAL_IDS.contains(photcalId) ) {
 			return "";
 		}
@@ -71,6 +67,7 @@ public class PhotCalFactory {
         response = splitFilterReference(response, filterId);
         
         String prettyString =  XmlUtils.prettyString(response);
+        System.out.println("put " + photcalId);
         PHOTCAL_CACHE.put(photcalId, prettyString);
         return prettyString;
     }
@@ -82,7 +79,7 @@ public class PhotCalFactory {
         
         String filterId = "_photfilter_" + calId;
     	if (FILTER_CACHE.containsKey(filterId)  ) {
-    		System.out.println("========= FILTER_CACHE");
+    		System.out.println("========= FILTER_CACHE "+ filterId);
     		return FILTER_CACHE.get(filterId);
     	}
         

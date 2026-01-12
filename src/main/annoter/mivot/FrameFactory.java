@@ -103,6 +103,15 @@ public class FrameFactory {
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
+		case Glossary.CSClass.FILTER_HIGH:
+		case Glossary.CSClass.FILTER_LOW:
+			this.ids.add(frameId);
+			filterId = frameId.replace("photCal", "photFilter");
+			this.ids.add(filterId);
+			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
+			frameHolder.frameId = filterId;
+			this.storeInCache(frameHolder);
+			return frameHolder;
 		case Glossary.CSClass.LOCAL:
 			this.ids.add(frameId);
 			frameHolder = this.buildLocalFrame(frameType, frameId);

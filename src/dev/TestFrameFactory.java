@@ -10,6 +10,15 @@ public class TestFrameFactory {
 		FrameFactory ff = FrameFactory.getInstance();
 		
 		try {
+			FrameHolder fh = ff.createFrame("photFilterHigh=u");
+			System.out.println("Frame ID: " + fh);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.exit(1);
+		
+		try {
 			FrameHolder fh = ff.createFrame("local=SUM_FLAG");
 			System.out.println("Frame ID: " + fh);
 			ff.reset();

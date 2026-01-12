@@ -197,6 +197,8 @@ public class Glossary {
         public static final String SPACE = "spaceSys";
         public static final String TIME = "timeSys";
         public static final String PHOTCAL = "photCal";
+        public static final String FILTER_HIGH = "photFilterHigh";
+        public static final String FILTER_LOW = "photFilterLow";
         public static final String LOCAL = "local";
     }
     public static class CTClass {

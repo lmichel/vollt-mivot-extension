@@ -23,6 +23,7 @@ public class TestMivotAnnotations {
 	private static MappingCache MAPPING_CACHE;
     public static TAPTable basicTable = new TAPTable("basic", TAPTable.TableType.table);
     public static TAPTable photometryTable = new TAPTable("photometry", TAPTable.TableType.table);
+    public static TAPTable colorTable = new TAPTable("color", TAPTable.TableType.table);
 
 	private static void buildCache() {
 		basicTable.addColumn(new TAPColumn("main_id", "description", "", "ucd",
@@ -68,8 +69,8 @@ public class TestMivotAnnotations {
 		photometryTable.addColumn(new TAPColumn("mag_u_errordown", "description", "mag", "ucd",
 				"mango:Brightness.error/mango:error.PErrorASym1D.low[CS.photCal=u]"));
 		
-		photometryTable.addColumn(new TAPColumn("color_uv", "description", "mag", "ucd",
-				"mango:Color.value[CS.high=u CS.low=v CT.mode=color]"));
+		colorTable.addColumn(new TAPColumn("color_uv", "description", "mag", "ucd",
+				"mango:Color.value[CS.photFilterHigh=u CS.photFilterLow=v CT.mode=color]"));
 
 	}
 
