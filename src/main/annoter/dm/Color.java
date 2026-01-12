@@ -52,7 +52,6 @@ public class Color extends Property {
 			String value = parts[1];
 			if( constantClass.equals("mode")) {
 				mode = "*" + value;
-				this.addAttribute("mango.Color.ColorDefinition", "mango:Color.colorDef", mode, null);
 				break;
 			}
 		}
@@ -77,11 +76,19 @@ public class Color extends Property {
 			this.addInstance(this.errorInstance);
 		}
 		
+		MivotInstance colorDef = new MivotInstance("mango:ColorDefinition", DMTYPE + ".colorDef", null);
+		colorDef.addAttribute("mango.ColorDefinition", "mango:ColorDef.definition", mode, null);
+		
 		for (FrameHolder fh : frameHolders) {
-			if (fh.systemClass.equals(Glossary.CSClass.PHOTCAL)) {
-				this.addReference(DMTYPE + ".photCal", fh.frameId);
+			System.out.println("@@@ Color frame: " + fh.frameId + " class: " + fh.systemClass);
+			if( fh.systemClass.equals(Glossary.CSClass.PHOTFILTERHIGH) ) {
+				colorDef.addReference("mango:ColorDefinition.high", fh.frameId);
+			}
+			else if( fh.systemClass.equals(Glossary.CSClass.PHOTFILTERLOW) ) {
+				colorDef.addReference("mango:ColorDefinition.low", fh.frameId);
 			}
 		}
+		this.addInstance(colorDef);
 	}
 
 	private void buildErrorInstance() throws Exception {

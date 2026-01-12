@@ -74,13 +74,13 @@ public class FrameFactory {
 		
 		String[] parts = utdCS.split("=");
 		String systemClass = parts[0];
-		String frameType = parts[1];
-
-		String frameId = this.buildID("_".concat(systemClass), frameType);
+		String systemValue = parts[1];
+		System.out.println("Creating frame for system: " + systemClass + " type: " + systemValue);
+		String frameId = this.buildID("_".concat(systemClass), systemValue);
 		frameId = frameId.replace("High", "")
 				.replace("Low", "")
 				.replace("filter", "photCal");
-		FrameHolder frameHolder = new FrameHolder(systemClass, frameType, frameId);
+		FrameHolder frameHolder = new FrameHolder(systemClass, systemValue, frameId);
 				
 		if( this.ids.contains(frameId)) {
 			 frameHolder.frameXml = null;
@@ -96,14 +96,14 @@ public class FrameFactory {
 		case "space":
 		case Glossary.CSClass.SPACE:
 			this.ids.add(frameId);			
-			frameHolder = this.buildSpaceFrame(frameType, frameId);
+			frameHolder = this.buildSpaceFrame(systemClass, systemValue, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.PHOTCAL:
 			this.ids.add(frameId);
 			String filterId = frameId.replace("photCal", "photFilter");
 			this.ids.add(filterId);
-			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
+			frameHolder = this.buildPhotCal(systemClass, systemValue, frameId, filterId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.PHOTFILTERLOW:
@@ -111,12 +111,12 @@ public class FrameFactory {
 			this.ids.add(frameId);
 			filterId = frameId.replace("photCal", "photFilter");
 			this.ids.add(filterId);
-			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
+			frameHolder = this.buildPhotCal(systemClass, systemValue, frameId, filterId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.LOCAL:
 			this.ids.add(frameId);
-			frameHolder = this.buildLocalFrame(frameType, frameId);
+			frameHolder = this.buildLocalFrame(systemClass, systemValue, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		default:
@@ -132,7 +132,7 @@ public class FrameFactory {
 		}
 	}
 	
-	private FrameHolder buildLocalFrame(String frameType, String frameId) throws IOException, MappingError {
+	private FrameHolder buildLocalFrame(String systemClass, String frameType, String frameId) throws IOException, MappingError {
 		
 		InputStream is = getClass().getClassLoader()
 		        .getResourceAsStream("snippets/mango.frame." + frameType + ".xml");
@@ -146,7 +146,7 @@ public class FrameFactory {
 		    }
 		    bytes = buffer.toByteArray();
 		}		
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameType, frameId);
+		FrameHolder frameHolder = new FrameHolder(systemClass, frameType, frameId);
 		frameHolder.setFrame(new String(bytes, StandardCharsets.UTF_8));
 		return frameHolder;
 
@@ -165,7 +165,7 @@ public class FrameFactory {
 	 * @return populated FrameHolder for the space frame
 	 * @throws MappingError on invalid input or mapping problems
 	 */
-	private FrameHolder buildSpaceFrame(String frameType, String frameId) throws MappingError {
+	private FrameHolder buildSpaceFrame(String systemClass, String frameType, String frameId) throws MappingError {
 		
 		String[] parts = frameType.split("\\(");
 		String spaceRefFrame = parts[0].trim();
@@ -197,7 +197,7 @@ public class FrameFactory {
    
         spaceFrame.addInstance(refLoc);
         spaceSys.addInstance(spaceFrame);
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameType, frameId);
+		FrameHolder frameHolder = new FrameHolder(systemClass, frameType, frameId);
 		frameHolder.setFrame(spaceSys);
 		
 		if( this.models.get(Glossary.ModelPrefix.COORDS) == null ) {
@@ -213,16 +213,17 @@ public class FrameFactory {
 	 * e.g. "ABMAG" or "VEGAMAG". The method constructs the appropriate
 	 * MivotInstance object and registers the PHOT model if not already present.
 	 *
-	 * @param frameType descriptor of the photometric calibration
+	 * @param systemValue descriptor of the photometric calibration
 	 * @param photcalId identifier to assign to the constructed frame
 	 * @param filterId identifier to assign to the associated filter
+	 * @param filterId2 
 	 * @return populated FrameHolder for the photometric calibration
 	 * @throws Exception on mapping problems
 	 */
-	private FrameHolder buildPhotCal(String frameType, String photcalId, String filterId) throws Exception {
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, frameType, photcalId);
-		this.photCal.getMivotPhotCal(frameType, photcalId, filterId);
-		frameHolder.setFrame(this.photCal.getMivotPhotCal(frameType, photcalId, filterId));
+	private FrameHolder buildPhotCal(String systemClass, String systemValue, String photcalId, String filterId) throws Exception {
+		FrameHolder frameHolder = new FrameHolder(systemClass, systemValue, photcalId);
+		this.photCal.getMivotPhotCal(systemValue, photcalId, filterId);
+		frameHolder.setFrame(this.photCal.getMivotPhotCal(systemValue, photcalId, filterId));
 		if( this.models.get(Glossary.ModelPrefix.PHOT) == null ) {
 			this.models.put(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
 		}
