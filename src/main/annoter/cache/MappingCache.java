@@ -1,10 +1,11 @@
-package main.annoter.meta;
+package main.annoter.cache;
 
 import tap.metadata.TAPColumn;
 import tap.metadata.TAPTable;
 import adql.db.DBColumn;
 import adql.db.SearchColumnList;
 import adql.query.from.ADQLTable;
+import main.annoter.meta.UtypeDecoder;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ public class MappingCache {
 			}
 		}
 	}
+	
 	public void addADQLTable(ADQLTable tapTable) {
 		
 		String tableName = tapTable.getName();
@@ -117,12 +119,9 @@ public class MappingCache {
 		if( this.getTableMapping(adqlTableName) == null ) {
 			return tableMapping;
 		}
-		System.out.println("@@@ Selected columns: " + selectedColumns);
 		for( UtypeDecoder utypeDecoder: this.getTableMapping(adqlTableName).values()) {
 			if( utypeDecoder.getHostClass().equals(hostClass)) {
-				System.out.println("@@@ Checking " + utypeDecoder.getTapColumn().getADQLName());
 				if( selectedColumns.contains(utypeDecoder.getTapColumn().getADQLName()) ) {
-					System.out.println("@@@ Mapped " + utypeDecoder.getTapColumn().getADQLName());
 					String key = utypeDecoder.getConstantAndFrames();
 					if( key == null) key = "default";
 					if( tableMapping.containsKey(key) == false ) {
@@ -163,7 +162,12 @@ public class MappingCache {
 	/**
 	 * for test purpose
 	 */
-	private void getFakeMappingCache() {
+	public void getFakeMappingCacheForBasic() {
+		if( this.storedTables.contains("basic")) {
+			return;
+		}
+		this.storedTables.add("basic");
+
 		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
 
 		tapColumns.add(new TAPColumn("main_id", "description", "", "ucd",
@@ -180,15 +184,15 @@ public class MappingCache {
 				"mango:EpochPosition.parallax"));
 		tapColumns.add(new TAPColumn("rvz_radvel", "description", "km / s", "ucd",
 				"mango:EpochPosition.radialVelocity"));
-		tapColumns.add(new TAPColumn("coo_err_maja", "description", "mas", "ucd",
+		tapColumns.add(new TAPColumn("coo_err_maj", "description", "mas", "ucd",
 				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.majorAxis"));
-		tapColumns.add(new TAPColumn("coo_err_mina", "description", "mas", "ucd",
+		tapColumns.add(new TAPColumn("coo_err_min", "description", "mas", "ucd",
 				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.minorAxis"));
 		tapColumns.add(new TAPColumn("coo_err_angle", "description", "deg", "ucd",
 				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.angle"));
-		tapColumns.add(new TAPColumn("pm_err_maja", "description", "mas / yr", "ucd",
+		tapColumns.add(new TAPColumn("pm_err_maj", "description", "mas / yr", "ucd",
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.majorAxis"));
-		tapColumns.add(new TAPColumn("pm_err_mina", "description", "mas / yr", "ucd",
+		tapColumns.add(new TAPColumn("pm_err_min", "description", "mas / yr", "ucd",
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.minorAxis"));
 		tapColumns.add(new TAPColumn("pm_err_angle", "description", "deg", "ucd",
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle"));
@@ -200,5 +204,59 @@ public class MappingCache {
 			cache.addTAPColumn(tapColumn);
 		}
 	}
+	
+	public void getFakeMappingCacheForFlux() {
+		if( this.storedTables.contains("allfluxes")) {
+			return;
+		}
+		this.storedTables.add("allfluxes");
+		
+		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
+
+		tapColumns.add(new TAPColumn("U", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=U]"));
+		tapColumns.add(new TAPColumn("B", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=B]"));
+		tapColumns.add(new TAPColumn("V", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=V]"));
+		tapColumns.add(new TAPColumn("G", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=G]"));
+		tapColumns.add(new TAPColumn("R", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=R]"));
+		tapColumns.add(new TAPColumn("I", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=I]"));
+		tapColumns.add(new TAPColumn("J", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=J]"));
+		tapColumns.add(new TAPColumn("H", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=H]"));
+		tapColumns.add(new TAPColumn("K", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=K]"));
+		tapColumns.add(new TAPColumn("F150W", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=F150W]"));
+		tapColumns.add(new TAPColumn("F200W", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=F200W]"));
+		tapColumns.add(new TAPColumn("F444W", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=F444W]"));
+		tapColumns.add(new TAPColumn("u_", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=u]"));
+		tapColumns.add(new TAPColumn("g_", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=g]"));
+		tapColumns.add(new TAPColumn("r_", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=r]"));
+		tapColumns.add(new TAPColumn("z_", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=z]"));
+		tapColumns.add(new TAPColumn("i_", "description", "", "ucd",
+				"mango:Brightness.value[CS.photCal=i]"));
+
+
+		MappingCache cache = MappingCache.getCache();
+        final TAPTable basicTable = new TAPTable("allfluxes", TAPTable.TableType.table);
+        for (TAPColumn tapColumn : tapColumns) {
+			basicTable.addColumn(tapColumn);
+			cache.addTAPColumn(tapColumn);
+		}
+	}
+	
+	
 	
 }

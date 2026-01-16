@@ -29,26 +29,12 @@ import main.annoter.utils.MivotUtils;
 import main.annoter.utils.XmlUtils;
 
 public class PhotCalFactory {
-    private static final Logger LOGGER = Logger.getLogger(MivotAnnotations.class.getName());
-    private  List<String> PHOTCAL_IDS = new ArrayList<String>();
-    private  List<String> PHOTFILTER_IDS = new ArrayList<String>();
-    private static Map<String, String> PHOTCAL_CACHE = new LinkedHashMap<String, String>();
-    private static Map<String, String> FILTER_CACHE = new LinkedHashMap<String, String>();
-    
-
+    private static final Logger LOGGER = Logger.getLogger(MivotAnnotations.class.getName());    
     
     public String getMivotPhotCal(String filterName, String photcalId, String filterId) throws Exception {
     	
-    	if (PHOTCAL_CACHE.containsKey(photcalId) ) {
-    		System.out.println("========= PHOTCAL_CACHE " + photcalId);
-    		return PHOTCAL_CACHE.get(photcalId);
-    	}
     	String svoId = getSVOId(filterName);
               
-        if( PHOTCAL_IDS.contains(photcalId) ) {
-			return "";
-		}
-
         String response = getFPSResponse(svoId);
  
         // fix some FPS tweaks
@@ -63,12 +49,9 @@ public class PhotCalFactory {
         		" dmrole=\"\"",
         		" dmid=\"" + photcalId + "\"");
         
-        PHOTCAL_IDS.add(photcalId);
         response = splitFilterReference(response, filterId);
         
         String prettyString =  XmlUtils.prettyString(response);
-        System.out.println("put " + photcalId);
-        PHOTCAL_CACHE.put(photcalId, prettyString);
         return prettyString;
     }
     
@@ -78,15 +61,7 @@ public class PhotCalFactory {
         String calId = MivotUtils.formatDmid(filterName);
         
         String filterId = "_photfilter_" + calId;
-    	if (FILTER_CACHE.containsKey(filterId)  ) {
-    		System.out.println("========= FILTER_CACHE "+ filterId);
-    		return FILTER_CACHE.get(filterId);
-    	}
         
-        if( PHOTFILTER_IDS.contains(filterId) ) {
-			return "";
-		}
-
         String response = getFPSResponse(svoId);
  
         // fix some FPS tweaks
@@ -103,11 +78,9 @@ public class PhotCalFactory {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		InputSource is = new InputSource(new StringReader(response.replace("<?xml version=\"1.0\"?>", "")));
 		Document doc = db.parse(is);
-		PHOTFILTER_IDS.add(filterId);
 		String prettyString = XmlUtils.nodeToString(findPhotometryFilter(doc)).replace(
 				" dmrole=\"" + Glossary.FILTER_ROLE + "\"",
 				" dmid=\"" + filterId + "\"");
-		FILTER_CACHE.put(filterId, prettyString);
         return prettyString;
     }
     
@@ -134,16 +107,11 @@ public class PhotCalFactory {
         Comment comment = doc.createComment(" WARNING The photometric system may vary from a data row to another");
 		parentNode.insertBefore(comment, parentNode.getFirstChild());
 		
-        if( PHOTFILTER_IDS.contains(filterId) ) {
-        	return  XmlUtils.nodeToString(parentNode);
-        } else {
-			PHOTFILTER_IDS.add(filterId);
-			return  XmlUtils.nodeToString(parentNode) +
+		return  XmlUtils.nodeToString(parentNode) +
 				"\n" +
 				XmlUtils.nodeToString(photometryFilterNode).replace(
 						" dmrole=\"" + Glossary.FILTER_ROLE + "\"",
 						" dmid=\"" + filterId + "\"");
-        }
 	}
     
     private static Node findPhotometryFilter(Document doc) throws Exception {

@@ -2,9 +2,10 @@ package main.annoter.mivot;
 
 import java.util.*;
 
+import main.annoter.cache.Cache;
+import main.annoter.cache.MappingCache;
 import main.annoter.dm.MangoInstance;
 import main.annoter.dm.Property;
-import main.annoter.meta.MappingCache;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.utils.XmlUtils;
 import main.annoter.meta.Glossary;
@@ -289,7 +290,7 @@ public class MivotAnnotations {
 			}
 			mi = new MangoInstance(utypeMappedColumn);
 			FrameFactory frameFactory = FrameFactory.getInstance();
-			frameFactory.reset();
+			Cache.resetSession();
 			for (String supportedProperty : Glossary.SUPPORTED_PROPERTIES) {
 				// Look for mapping rules for the property in the current table
 
@@ -297,20 +298,20 @@ public class MivotAnnotations {
 
 					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(table,
 							"mango:" + supportedProperty, selectedColumns);
+					List<String> constants = new ArrayList<String>();
 					for (String key : propertyMapping.keySet()) {
 						List<FrameHolder> frameHolders = new ArrayList<>();
-						System.out.println(supportedProperty + " mapping: " + key);
 						List<UtypeDecoder> utds = propertyMapping.get(key);
 						for (String cs : utds.get(0).getFrames()) {
-							System.out.println(" Creating frame for CS: " + cs);
 							FrameHolder fh = frameFactory.createFrame(cs);
 							frameHolders.add(fh);
-							mivotAnnotation.addModel(fh.systemClass, frameFactory.models.get(fh.systemClass));
-
 							mivotAnnotation.addGlobals(fh.frameXml);
 						}
+						for (String ct : utds.get(0).getConstants()) {
+							constants.add(ct);
+						}
 						Property property = (Property) Property.getInstance(supportedProperty, utds, table,
-								frameHolders);
+								frameHolders, constants);
 						mi.addMangoProperties(property);
 					}
 				}
@@ -318,8 +319,8 @@ public class MivotAnnotations {
 
 			mivotAnnotation.addModel(Glossary.ModelPrefix.IVOA, Glossary.VodmlUrl.IVOA);
 			mivotAnnotation.addModel(Glossary.ModelPrefix.MANGO, Glossary.VodmlUrl.MANGO);
-			for (String model : FrameFactory.getInstance().models.keySet()) {
-				mivotAnnotation.addModel(model, FrameFactory.getInstance().models.get(model));
+			for (String model : Cache.getReferencedModelList() ) {
+				mivotAnnotation.addModel(model, Cache.getReferencedModel(model));
 			}
 
 			mivotAnnotation.addTemplates(mi);

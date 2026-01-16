@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import main.annoter.cache.Cache;
 import main.annoter.meta.Glossary;
 
 /**
@@ -25,15 +26,7 @@ public class FrameFactory {
 	/** Singleton instance. */
 	private static FrameFactory instance;
 
-	/** Collected frame IDs already created by this factory (prevents duplicates). */
-	private List<String> ids = new ArrayList<String>();
-
-	private Map<String, FrameHolder> cache = new LinkedHashMap<String, FrameHolder>();
-
-	/** Map of model prefix -> vodml URL used by created frames. */
-	public Map<String, String> models = new LinkedHashMap<String, String>();
-
-	private PhotCalFactory photCal;
+	private PhotCalFactory photCalFactory = new PhotCalFactory();
 	/**
 	 * Return the singleton instance of the factory.
 	 *
@@ -50,14 +43,8 @@ public class FrameFactory {
 	 * Private constructor for the singleton.
 	 */
 	private FrameFactory() {
-		this.reset();
 	}
 	
-	public void reset() {
-		models = new LinkedHashMap<String, String>();
-		ids = new ArrayList<String>();
-		photCal = new PhotCalFactory();
-	}
 	/**
 	 * Create a FrameHolder from a combined system=frameType string.
 	 *
@@ -77,43 +64,51 @@ public class FrameFactory {
 		String frameType = parts[1];
 
 		String frameId = this.buildID("_".concat(systemClass), frameType);
-		FrameHolder frameHolder = new FrameHolder(systemClass, frameId);
+		FrameHolder frameHolder = new FrameHolder(systemClass, frameId, null, null);
 				
-		if( this.ids.contains(frameId)) {
-			 frameHolder.frameXml = null;
-			 return frameHolder;
+		if( Cache.containsGlobalsId(frameId)) {
+			frameHolder.frameXml = null;
+			return frameHolder;
 		}
 		
-		if( cache.containsKey(frameId)) {
-			System.out.println("======= cacche0");
-			return cache.get(frameId);
+		if( (frameHolder = Cache.getFrameHolder(frameId)) != null ) {
+			/*
+			 * Although the frame is already in cache, we must reference the 
+			 * related model in the annotations 
+			 */
+			if( frameHolder.modelPrefix != null ) {
+				Cache.storeReferencedModel(frameHolder.modelPrefix, frameHolder.modelUrl);
+			}
+			return frameHolder;
 		}
 				
 		switch(systemClass) {
 		case "space":
 		case Glossary.CSClass.SPACE:
-			this.ids.add(frameId);			
+			Cache.storeGlobalsId(frameId);
 			frameHolder = this.buildSpaceFrame(frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.PHOTCAL:
-			this.ids.add(frameId);
+			Cache.storeGlobalsId(frameId);
 			String filterId = frameId.replace("photCal", "photFilter");
-			this.ids.add(filterId);
+			Cache.storeGlobalsId(filterId);
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.FILTER_HIGH:
 		case Glossary.CSClass.FILTER_LOW:
-			this.ids.add(frameId);
+			Cache.storeGlobalsId(frameId);
 			filterId = frameId.replace("photCal", "photFilter");
-			this.ids.add(filterId);
+			Cache.storeGlobalsId(filterId);
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
 			frameHolder.frameId = filterId;
+			// restore the correct system class (squashed by buildPhotCal)
+ 			frameHolder.systemClass = systemClass;
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.LOCAL:
-			this.ids.add(frameId);
+			Cache.storeGlobalsId(frameId);
 			frameHolder = this.buildLocalFrame(frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
@@ -124,9 +119,7 @@ public class FrameFactory {
 	
 	private void storeInCache(FrameHolder frameHolder) {
 		if(frameHolder.frameXml != null) {
-			System.out.println("======= store " + frameHolder.frameId);
-
-			this.cache.put(frameHolder.frameId, frameHolder);
+			Cache.storeFrameHolder(frameHolder);
 		}
 	}
 	
@@ -144,7 +137,7 @@ public class FrameFactory {
 		    }
 		    bytes = buffer.toByteArray();
 		}		
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameId);
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameId, null, null);
 		frameHolder.setFrame(new String(bytes, StandardCharsets.UTF_8));
 		return frameHolder;
 
@@ -195,12 +188,10 @@ public class FrameFactory {
    
         spaceFrame.addInstance(refLoc);
         spaceSys.addInstance(spaceFrame);
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameId);
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameId, Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
 		frameHolder.setFrame(spaceSys);
 		
-		if( this.models.get(Glossary.ModelPrefix.COORDS) == null ) {
-			this.models.put(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
-		}
+		Cache.storeReferencedModel(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
 		return frameHolder;
 	}
 	
@@ -218,13 +209,11 @@ public class FrameFactory {
 	 * @throws Exception on mapping problems
 	 */
 	private FrameHolder buildPhotCal(String frameType, String photcalId, String filterId) throws Exception {
-		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, photcalId);
-		this.photCal.getMivotPhotCal(frameType, photcalId, filterId);
-		frameHolder.setFrame(this.photCal.getMivotPhotCal(frameType, photcalId, filterId));
-		if( this.models.get(Glossary.ModelPrefix.PHOT) == null ) {
-			this.models.put(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
-		}
-
+		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, photcalId, Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
+		this.photCalFactory.getMivotPhotCal(frameType, photcalId, filterId);
+		frameHolder.setFrame(this.photCalFactory.getMivotPhotCal(frameType, photcalId, filterId));
+		Cache.storeReferencedModel(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
+		
 		return frameHolder;
 	}
 	/**
@@ -243,16 +232,5 @@ public class FrameFactory {
 			           .replace("(", "_")
 			           .replace(")", "")
 			           .replace(",", "_");
-	}
-	
-	/**
-	 * Check whether an id was already created by this factory.
-	 *
-	 * @param id id to check
-	 * @return true if the id is known, false otherwise
-	 */
-	public boolean hasId(String id) {
-		return this.ids.contains(id);
-
 	}
 }

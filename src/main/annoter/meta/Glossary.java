@@ -28,7 +28,8 @@ public class Glossary {
     
     public static final List<String> SUPPORTED_PROPERTIES  = Arrays.asList(
             "EpochPosition",
-			"Brightness"
+			"Brightness",
+			"Color"
         );
       
     public static class Roles {
@@ -171,18 +172,18 @@ public class Glossary {
         static public Map<String, String> map = new LinkedHashMap<>();
 
         static {
-            map.put("K", "2MASS/2MASS.Ks/Vega");
-            map.put("H", "2MASS/2MASS.H/Vega");
+            map.put("K", "2MASS/2MASS.Ks/AB");
+            map.put("H", "2MASS/2MASS.H/AB");
             map.put("R", "");
-            map.put("J", "2MASS/2MASS.J/Vega");
+            map.put("J", "2MASS/2MASS.J/AB");
             map.put("V", "");
             map.put("B", "");
             map.put("I", "");
-            map.put("u", "SLOAN/SDSS.u/Vega");
-            map.put("r", "SLOAN/SDSS.r/Vega");
-            map.put("z", "SLOAN/SDSS.z/Vega");
-            map.put("g", "SLOAN/SDSS.g/Vega");
-            map.put("G", "GAIA/GAIA3.G/Vega");
+            map.put("u", "SLOAN/SDSS.u/AB");
+            map.put("r", "SLOAN/SDSS.r/AB");
+            map.put("z", "SLOAN/SDSS.z/AB");
+            map.put("g", "SLOAN/SDSS.g/AB");
+            map.put("G", "GAIA/GAIA3.G/AB");
             map.put("F444W", "JWST/NIRCam.F444W/Vega");
             map.put("F150W", "JWST/NIRCam.F150W/Vega");
             map.put("F200W", "JWST/NIRCam.F200W/Vega");
@@ -206,6 +207,7 @@ public class Glossary {
          */
         public static final String EPOCH = "epoch";
         public static final String LOCAL = "local";
+        public static final String MODE = "mode";
     }
 }
 

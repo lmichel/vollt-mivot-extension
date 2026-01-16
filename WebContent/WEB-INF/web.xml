@@ -6,7 +6,7 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee  http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 	
 	<servlet>
-		<servlet-name>xTapDB</servlet-name>
+		<servlet-name>vollt-extension</servlet-name>
 		<servlet-class>tap.config.ConfigurableTAPServlet</servlet-class>
 		
 		<init-param>
@@ -16,7 +16,7 @@
     	
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>xTapDB</servlet-name>
+		<servlet-name>vollt-extension</servlet-name>
 		<url-pattern>/*</url-pattern>
  </servlet-mapping>
 	

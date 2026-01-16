@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import main.annoter.cache.MappingCache;
 import main.annoter.meta.Glossary;
-import main.annoter.meta.MappingCache;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MappingError;
@@ -26,8 +26,10 @@ public class EpochPosition extends Property {
 	private List<UtypeDecoder> parallaxErrorUtypes = new ArrayList<>();
 
 	@SuppressWarnings("serial")
-	public EpochPosition(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders)
-			throws Exception {
+	public EpochPosition(List<UtypeDecoder> utypeDecoders,
+			String tableName,
+			List<FrameHolder> frameHolders,
+			List<String> constants) throws Exception {
 
 		super(DMTYPE, null, null, new HashMap<String, String>() {
 			{

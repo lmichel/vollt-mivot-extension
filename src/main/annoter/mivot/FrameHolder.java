@@ -5,10 +5,14 @@ public class FrameHolder {
 	public String frameId;
 	public String frameXml;
 	public String systemClass;
+	public String modelPrefix;
+	public String modelUrl;
 
-	public FrameHolder(String systemClass,  String frameId) {
+	public FrameHolder(String systemClass,  String frameId, String modelPrefix, String modelUrl) {
 		this.frameId = frameId;
 		this.systemClass = systemClass;
+		this.modelPrefix = modelPrefix;
+		this.modelUrl = modelUrl;
 	}
 	
 	public String toString() {

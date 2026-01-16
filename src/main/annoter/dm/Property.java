@@ -1,9 +1,11 @@
 package main.annoter.dm;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import main.annoter.cache.Cache;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MappingError;
@@ -14,7 +16,8 @@ public class Property extends MivotInstance {
 	private static Class<?>[] paramTypes = new Class<?>[] {
         List.class,     // List<UtypeDecoder>
         String.class,   // tableName
-        List.class      // List<FrameHolder>
+        List.class ,     // List<FrameHolder>
+        List.class // List<Constant>
 	};
 
     public Property(String dmtype) throws MappingError {
@@ -47,10 +50,12 @@ public class Property extends MivotInstance {
     }
     
 	    public static Property getInstance(String className,
-	    		List<UtypeDecoder> utds, String table,
-	    		List<FrameHolder> frameHolders) throws Exception {
-		Class<?> cls = Class.forName("main.annoter.dm." + className);
+	    		List<UtypeDecoder> utds,
+	    		String table,
+	    		List<FrameHolder> frameHolders,
+	    		List<String> constants) throws Exception {
+		Class<?> cls = Cache.getPropertyClass(className);
 		Constructor<?> constructor = cls.getConstructor(paramTypes);
-		return (Property) constructor.newInstance(utds, table, frameHolders);
+		return (Property) constructor.newInstance(utds, table, frameHolders, constants);
 	}
 }

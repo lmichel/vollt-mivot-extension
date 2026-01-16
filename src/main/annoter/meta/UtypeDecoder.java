@@ -53,8 +53,6 @@ public class UtypeDecoder {
 		String[] eles = utype.split(":");
 
 		this.extractConstantsAndFrames();
-		System.out.println(this.processSimpleRole());
-		System.out.println(this.processCompound());
     	if( this.processSimpleRole() == false && this.processCompound() == false ) {
 			System.out.println("UTYPE not valid: " + this.utype);
 			System.exit(1);
@@ -135,7 +133,6 @@ public class UtypeDecoder {
             this.utype = matcher.group(1).trim();
 
             this.constantAndFrames = matcher.group(2);
-            System.out.println("=====Extracting constants and frames from utype: " + this.constantAndFrames);
             if (this.constantAndFrames != null) {
                 Matcher innerMatcher = Pattern.compile("C(?:S|T)\\.\\w+=\\w+").matcher(this.constantAndFrames);
                 while (innerMatcher.find()) {
@@ -150,7 +147,7 @@ public class UtypeDecoder {
                 }
             } 
         } else {
-            System.out.println("No match for input: " + input);
+            System.out.println("No constant or frame for input: " + input);
         }
     }
 	public String getHostClass() {

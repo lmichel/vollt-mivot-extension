@@ -2,11 +2,7 @@ package dev;
 
 
 
-<<<<<<< HEAD
 import main.annoter.mivot.PhotCalFactory;
-=======
-import main.annoter.dm.PhotCalFactory;
->>>>>>> branch 'main' of git@github.com:lmichel/vollt-mivot-extension.git
 
 public class TestPhotCal {
 

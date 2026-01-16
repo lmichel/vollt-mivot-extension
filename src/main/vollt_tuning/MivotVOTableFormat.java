@@ -2,6 +2,8 @@ package main.vollt_tuning;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,10 +13,10 @@ import adql.parser.ParseException;
 import adql.query.ADQLQuery;
 import adql.query.from.ADQLTable;
 import adql.query.from.FromContent;
+import main.annoter.cache.MappingCache;
 import main.annoter.dm.EpochPosition;
 import main.annoter.dm.MangoInstance;
 import main.annoter.meta.Glossary;
-import main.annoter.meta.MappingCache;
 import main.annoter.mivot.MivotAnnotations;
 import tap.ServiceConnection;
 import tap.TAPException;
@@ -61,6 +63,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 	private void writeAnnotations(final TAPExecutionReport execReport, final BufferedWriter out) {
 		MappingCache MAPPING_CACHE = MappingCache.getCache();
 
+		this.service.getLogger().log(LogLevel.INFO, "MIVOT", "@ MIVOT", null);
 		String query = execReport.parameters.getQuery();
 
 		String tableName;
@@ -78,11 +81,14 @@ public class MivotVOTableFormat extends VOTableFormat {
 		
 		FromContent from = parsedQuery.getFrom();
 		for( ADQLTable tapTable: from.getTables()) {
-			MAPPING_CACHE.addADQLTable(tapTable);
+			//MAPPING_CACHE.addADQLTable(tapTable);
+			MAPPING_CACHE.getFakeMappingCacheForBasic();
+			MAPPING_CACHE.getFakeMappingCacheForFlux();
 		}
 
 		StringBuffer message = new StringBuffer();
 		if( this.isQueryMappable(parsedQuery, message) == true ) {
+			Instant start = Instant.now();
 			
 			this.service.getLogger().log(LogLevel.INFO, "MIVOT", "Start writing annotations for table " + tableName, null);
 
@@ -90,6 +96,8 @@ public class MivotVOTableFormat extends VOTableFormat {
 				columnNames.add(col.getADQLName());	
 			}
 			String outXml = MivotAnnotations.mapMango(tableName, columnNames);
+			Duration duration = Duration.between(start, Instant.now());
+			System.out.println("Annotations generated in " + duration.toMillis() + " ms");
 			try {
 				out.write(outXml);
 				out.flush();
@@ -97,6 +105,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 				e.printStackTrace();
 			}
 		} else {
+			this.service.getLogger().log(LogLevel.INFO, "MIVOT", message.toString(), null);
 			this.writeMappingError(message.toString(), out);			
 		}
 	}

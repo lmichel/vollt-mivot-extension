@@ -1,12 +1,13 @@
 package dev;
 
-import main.annoter.meta.MappingCache;
 import tap.metadata.TAPColumn;
 import tap.metadata.TAPTable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import main.annoter.cache.MappingCache;
 
 public class TestMappingCache {
 
