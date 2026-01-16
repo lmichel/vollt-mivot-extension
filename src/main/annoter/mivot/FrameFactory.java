@@ -86,7 +86,7 @@ public class FrameFactory {
 		case "space":
 		case Glossary.CSClass.SPACE:
 			Cache.storeGlobalsId(frameId);
-			frameHolder = this.buildSpaceFrame(frameType, frameId);
+			frameHolder = this.buildSpaceFrame(systemClass, frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.PHOTCAL:
@@ -109,7 +109,7 @@ public class FrameFactory {
 			return frameHolder;
 		case Glossary.CSClass.LOCAL:
 			Cache.storeGlobalsId(frameId);
-			frameHolder = this.buildLocalFrame(frameType, frameId);
+			frameHolder = this.buildLocalFrame(systemClass, frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		default:
@@ -123,7 +123,7 @@ public class FrameFactory {
 		}
 	}
 	
-	private FrameHolder buildLocalFrame(String frameType, String frameId) throws IOException, MappingError {
+	private FrameHolder buildLocalFrame(String systemClass, String frameType, String frameId) throws IOException, MappingError {
 		
 		InputStream is = getClass().getClassLoader()
 		        .getResourceAsStream("snippets/mango.frame." + frameType + ".xml");
@@ -156,7 +156,7 @@ public class FrameFactory {
 	 * @return populated FrameHolder for the space frame
 	 * @throws MappingError on invalid input or mapping problems
 	 */
-	private FrameHolder buildSpaceFrame(String frameType, String frameId) throws MappingError {
+	private FrameHolder buildSpaceFrame(String systemClass, String frameType, String frameId) throws MappingError {
 		
 		String[] parts = frameType.split("\\(");
 		String spaceRefFrame = parts[0].trim();
@@ -202,9 +202,10 @@ public class FrameFactory {
 	 * e.g. "ABMAG" or "VEGAMAG". The method constructs the appropriate
 	 * MivotInstance object and registers the PHOT model if not already present.
 	 *
-	 * @param frameType descriptor of the photometric calibration
+	 * @param systemValue descriptor of the photometric calibration
 	 * @param photcalId identifier to assign to the constructed frame
 	 * @param filterId identifier to assign to the associated filter
+	 * @param filterId2 
 	 * @return populated FrameHolder for the photometric calibration
 	 * @throws Exception on mapping problems
 	 */

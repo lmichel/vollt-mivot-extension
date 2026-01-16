@@ -24,6 +24,10 @@ public class TestUtypeDecoder {
 				"description", "unit", "ucd",
 				"mango:Brightness.error/mango:error.PErrorSym1D.sigma1[CS.photcal=K]"));
 		
+		tapColumns.add(new TAPColumn("columnName_4",
+				"description", "unit", "ucd",
+				"mango:Color.value[CS.photCalHigh=u CS.photCalLow=r CT.mode=color]"));
+		
 		for( TAPColumn tapColumn: tapColumns) {
 			UtypeDecoder utd = new UtypeDecoder(tapColumn);
 			System.out.println(utd);

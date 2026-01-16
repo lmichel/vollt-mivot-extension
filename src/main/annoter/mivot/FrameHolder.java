@@ -16,7 +16,7 @@ public class FrameHolder {
 	}
 	
 	public String toString() {
-		return this.systemClass + "/" + frameId + "\n" + ((frameXml == null)? "null": frameXml);
+		return this.systemClass + "<>" + "->" + frameId + "\n" + ((frameXml == null)? "null": frameXml);
 	}
 	
 	public void setFrame(Object instance) throws MappingError {

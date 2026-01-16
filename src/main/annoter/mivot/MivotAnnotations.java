@@ -293,13 +293,18 @@ public class MivotAnnotations {
 			Cache.resetSession();
 			for (String supportedProperty : Glossary.SUPPORTED_PROPERTIES) {
 				// Look for mapping rules for the property in the current table
-
+				System.out.println("Processing property: " + supportedProperty);
 				for (String table : tables) {
+					System.out.println(" Checking table: " + table + " " + selectedColumns);
 
-					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(table,
-							"mango:" + supportedProperty, selectedColumns);
+					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
+							table,
+							"mango:" + supportedProperty,
+							selectedColumns);
 					List<String> constants = new ArrayList<String>();
 					for (String key : propertyMapping.keySet()) {
+						System.out.println(" Found mapping for property " + supportedProperty + " in table " + table
+								+ " with key " + key);
 						List<FrameHolder> frameHolders = new ArrayList<>();
 						List<UtypeDecoder> utds = propertyMapping.get(key);
 						for (String cs : utds.get(0).getFrames()) {

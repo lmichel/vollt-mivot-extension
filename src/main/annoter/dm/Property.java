@@ -24,7 +24,10 @@ public class Property extends MivotInstance {
         super(dmtype, null, null);
     }
     
-	public Property(List<UtypeDecoder> utypeDecoders, String tableName, List<FrameHolder> frameHolders) throws MappingError {
+	public Property(List<UtypeDecoder> utypeDecoders,
+			String tableName,
+			List<FrameHolder> frameHolders,
+			List<String> constants) throws MappingError {
         super(null, null, null);
 	}
 
