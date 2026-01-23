@@ -10,14 +10,7 @@ public class TestFrameFactory {
 		FrameFactory ff = FrameFactory.getInstance();
 		
 		try {
-<<<<<<< HEAD
 			FrameHolder fh = ff.createFrame("photFilterHigh=u");
-=======
-			FrameHolder fh = ff.createFrame("filterLow=r");
-			System.out.println("Frame ID: " + fh);
-			ff.reset();
-			fh = ff.createFrame("filterHigh=u");
->>>>>>> branch 'main' of git@github.com:lmichel/vollt-mivot-extension.git
 			System.out.println("Frame ID: " + fh);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
