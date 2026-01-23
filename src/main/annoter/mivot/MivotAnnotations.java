@@ -293,9 +293,9 @@ public class MivotAnnotations {
 			Cache.resetSession();
 			for (String supportedProperty : Glossary.SUPPORTED_PROPERTIES) {
 				// Look for mapping rules for the property in the current table
-				System.out.println("Processing property: " + supportedProperty);
+				System.out.println("Looking at property: " + supportedProperty);
 				for (String table : tables) {
-					System.out.println(" Checking table: " + table + " " + selectedColumns);
+					System.out.println(" Check if table: " + table + " " + selectedColumns + " maps it");
 
 					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
 							table,

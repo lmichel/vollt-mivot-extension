@@ -56,9 +56,13 @@ public class TestMivotAnnotations {
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.minorAxis[CS.spaceSys=ICRS CT.epoch=J2000]"));
 		basicTable.addColumn(new TAPColumn("pm_err_angle", "description", "deg", "ucd",
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle[CS.spaceSys=ICRS CT.epoch=J2000]"));
+		basicTable.addColumn(new TAPColumn("otype", "Objet type", "", "",
+				"mango:Label.text[CT.vocabulary=https://www.ivoa.net/rdf/uat#classification]"));
 		
  		
 
+		photometryTable.addColumn(new TAPColumn("magnitude_U", "description", "mag", "ucd",
+				"mango:Brightness.value[CS.photCal=U]"));
 		photometryTable.addColumn(new TAPColumn("magnitude_k", "description", "mag", "ucd",
 				"mango:Brightness.value[CS.photCal=K]"));
 		photometryTable.addColumn(new TAPColumn("mag_k_error", "description", "mag", "ucd",
@@ -78,10 +82,10 @@ public class TestMivotAnnotations {
 	private static List<String> getFromTable() {
 		MAPPING_CACHE = MappingCache.getCache();
 		MAPPING_CACHE.addTAPTable(basicTable);
-		MAPPING_CACHE.addTAPTable(photometryTable);
-		MAPPING_CACHE.addTAPTable(colorTable);
+		//MAPPING_CACHE.addTAPTable(photometryTable);
+		//MAPPING_CACHE.addTAPTable(colorTable);
 		return Arrays.asList("basic", "photometry", "color");
-		//return Arrays.asList("color");
+		//return Arrays.asList("basic");
 
 	}
 
@@ -90,11 +94,13 @@ public class TestMivotAnnotations {
 		//		"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel");
 		//return Arrays.asList("magnitude_u", "mag_error_u", "magnitude_k", "mag_k_error");
 		//return Arrays.asList("magnitude_u", "mag_u_errordown", "mag_u_errorup");
-		//sreturn Arrays.asList("magnitude_u", "mag_u_errorup");
+		//return Arrays.asList("magnitude_u", "mag_u_errorup");
 		//return Arrays.asList("color_ur");
-		return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
-		  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
-				"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
+		//return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
+		//  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
+		//		"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
+		return Arrays.asList("otype");
+
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -118,10 +124,7 @@ public class TestMivotAnnotations {
 		System.out.println(outXml.equals(outXml2));
 		//diffLines(outXml, outXml2);
 		//System.out.println(outXml);
-		//System.out.println(outXml2);
-
-		
-
+		System.out.println(outXml2);
 	}
 	
 	public static void diffLines(String a, String b) {

@@ -177,25 +177,27 @@ public class MappingCache {
 		tapColumns.add(new TAPColumn("ra", "description", "deg", "ucd",
 				"mango:EpochPosition.longitude[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pmdec", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.pmLatitude"));
+				"mango:EpochPosition.pmLatitude[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pmra", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.pmLongitude"));
+				"mango:EpochPosition.pmLongitude[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("parallax", "description", "mas", "ucd",
-				"mango:EpochPosition.parallax"));
+				"mango:EpochPosition.parallax[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("rvz_radvel", "description", "km / s", "ucd",
-				"mango:EpochPosition.radialVelocity"));
+				"mango:EpochPosition.radialVelocity[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("coo_err_maj", "description", "mas", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.majorAxis"));
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.majorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("coo_err_min", "description", "mas", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.minorAxis"));
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.minorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("coo_err_angle", "description", "deg", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.angle"));
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.angle[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pm_err_maj", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.majorAxis"));
+				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.majorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pm_err_min", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.minorAxis"));
+				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.minorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pm_err_angle", "description", "deg", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle"));
+				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle[CS.spaceSys=ICRS]"));
+		tapColumns.add(new TAPColumn("otype", "Objet type", "", "",
+				"mango:Label.text[CT.vocabulary=https://www.ivoa.net/rdf/uat#classification]"));
 
 		MappingCache cache = MappingCache.getCache();
         final TAPTable basicTable = new TAPTable("basic", TAPTable.TableType.table);

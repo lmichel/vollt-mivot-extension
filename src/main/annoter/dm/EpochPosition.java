@@ -57,7 +57,7 @@ public class EpochPosition extends Property {
 	
 		if( epoch != null ) {
 			this.addAttribute("year","mango:EpochPosition.obsDate",
-					"*" + epoch.split("=")[1].replace("J",""),
+					"*" + epoch.replace("J",""),
 					null);
 
 		}

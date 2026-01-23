@@ -32,8 +32,16 @@ public class Property extends MivotInstance {
 	}
 
 
+    public Property(String dmtype, String dmrole, String dmid) throws MappingError {
+        super(dmtype, dmrole, dmid);
+    }
+    
     public Property(String dmtype, String dmrole, String dmid, Map<String, String> semantics) throws MappingError {
         super(dmtype, dmrole, dmid);
+        this.setSemantics(semantics);
+    }
+        
+    public void setSemantics(Map<String, String> semantics) throws MappingError {
         if (semantics.containsKey("description")) {
             this.addAttribute("ivoa:string", "mango:Property.description", "*" + semantics.get("description"), null);
         }
@@ -50,9 +58,9 @@ public class Property extends MivotInstance {
 
             this.addInstance(semanticsInstance);
         }
+   	
     }
-    
-	    public static Property getInstance(String className,
+    public static Property getInstance(String className,
 	    		List<UtypeDecoder> utds,
 	    		String table,
 	    		List<FrameHolder> frameHolders,

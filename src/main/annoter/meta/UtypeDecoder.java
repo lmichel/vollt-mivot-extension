@@ -124,7 +124,7 @@ public class UtypeDecoder {
 	private void extractConstantsAndFrames() {
         String input = "prefix text [CS.name=John CT.age=30]";
         input = this.utype;
-        String cs_regexp =  "[a-zA-Z0-9\\./]";
+        String cs_regexp =  "[\\:#a-zA-Z0-9\\./]";
         String regex = "([^\\[]*)(\\[(C(?:S|T)\\.\\w+="+ cs_regexp + "+\\s?)+\\])";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
@@ -134,7 +134,7 @@ public class UtypeDecoder {
 
             this.constantAndFrames = matcher.group(2);
             if (this.constantAndFrames != null) {
-                Matcher innerMatcher = Pattern.compile("C(?:S|T)\\.\\w+=\\w+").matcher(this.constantAndFrames);
+                Matcher innerMatcher = Pattern.compile("C(?:S|T)\\.\\w+=[\\:#a-zA-Z0-9\\./]+").matcher(this.constantAndFrames);
                 while (innerMatcher.find()) {
                 	String match = innerMatcher.group();
                 	if( match.startsWith("CS")) {
@@ -182,7 +182,7 @@ public class UtypeDecoder {
 	public String getConstant(String ctClass) {
 		for(String constant: this.constants) {
 			if( constant.startsWith(ctClass + "=") ){
-				return(constant);
+				return(constant.replace(ctClass + "=", ""));
 			}
 		}
 		return null;

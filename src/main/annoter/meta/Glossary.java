@@ -29,7 +29,8 @@ public class Glossary {
     public static final List<String> SUPPORTED_PROPERTIES  = Arrays.asList(
             "EpochPosition",
 			"Brightness",
-			"Color"
+			"Color",
+			"Label"
         );
       
     public static class Roles {
@@ -175,6 +176,7 @@ public class Glossary {
             map.put("K", "2MASS/2MASS.Ks/AB");
             map.put("H", "2MASS/2MASS.H/AB");
             map.put("R", "");
+            map.put("U", "");
             map.put("J", "2MASS/2MASS.J/AB");
             map.put("V", "");
             map.put("B", "");
@@ -208,6 +210,7 @@ public class Glossary {
         public static final String EPOCH = "epoch";
         public static final String LOCAL = "local";
         public static final String MODE = "mode";
+        public static final String VOCABULARY = "vocabulary";
     }
 }
 
