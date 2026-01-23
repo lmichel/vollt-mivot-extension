@@ -1,0 +1,32 @@
+
+<INSTANCE dmid="_photCal_B" dmtype="Phot:PhotCal">
+  <!-- WARNING The photometric system may vary from a data row to another -->
+  <ATTRIBUTE dmrole="Phot:PhotCal.identifier" dmtype="ivoa:string" value="B" />
+  <REFERENCE dmid="_photFilter_B" dmrole="Phot:PhotCal.photometryFilter" />
+</INSTANCE>
+<INSTANCE dmid="_photFilter_B" dmtype="Phot:photometryFilter">
+  <ATTRIBUTE dmrole="Phot:PhotometryFilter.fpsIdentifier" dmtype="ivoa:string" value="mango://local/B" />
+  <ATTRIBUTE dmrole="Phot:PhotometryFilter.identifier" dmtype="ivoa:string" value="mango://local/B" />
+  <ATTRIBUTE dmrole="Phot:PhotometryFilter.name" dmtype="ivoa:string" value="B" />
+  <ATTRIBUTE dmrole="Phot:PhotometryFilter.description" dmtype="ivoa:string" value="standard Blue band" />
+  <ATTRIBUTE dmrole="Phot:PhotometryFilter.bandName" dmtype="ivoa:string" value="B" />
+  <INSTANCE dmrole="Phot:PhotometryFilter.bandwidth" dmtype="Phot:Bandwidth">
+    <ATTRIBUTE dmrole="Phot:Bandwidth.ucd" dmtype="Phot:UCD" value="instr.bandwidth" />
+    <ATTRIBUTE dmrole="Phot:Bandwidth.unitexpression" dmtype="ivoa:Unit" value="nm" />
+    <ATTRIBUTE dmrole="Phot:Bandwidth.extent" dmtype="ivoa:real" value="94" />
+    <ATTRIBUTE dmrole="Phot:Bandwidth.start" dmtype="ivoa:real" value="398" />
+    <ATTRIBUTE dmrole="Phot:Bandwidth.stop" dmtype="ivoa:real" value="492" />
+  </INSTANCE>
+  <INSTANCE dmrole="Phot:PhotometryFilter.transmissionCurve" dmtype="Phot:TransmissionCurve">
+    <INSTANCE dmrole="Phot:TransmissionCurve.access" dmtype="Phot:Access">
+      <ATTRIBUTE dmrole="Phot:Access.reference" dmtype="ivoa:anyURI"
+        value="https://en.wikipedia.org/wiki/Photometric_system" />
+      <ATTRIBUTE dmrole="Phot:Access.size" dmtype="ivoa:integer" value="1" />
+      <ATTRIBUTE dmrole="Phot:Access.format" dmtype="ivoa:string" value="text/html" />
+    </INSTANCE>
+  </INSTANCE>
+  <INSTANCE dmrole="Phot:PhotometryFilter.spectralLocation" dmtype="Phot:SpectralLocation">
+    <ATTRIBUTE dmrole="Phot:SpectralLocation.ucd" dmtype="Phot:UCD" value="em.wl;meta.main" />
+    <ATTRIBUTE dmrole="Phot:SpectralLocation.unitexpression" dmtype="ivoa:Unit" value="nm" />
+    <ATTRIBUTE dmrole="Phot:SpectralLocation.value" dmtype="ivoa:real" value="445" />
+  </INSTANCE>

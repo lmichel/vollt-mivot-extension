@@ -211,8 +211,13 @@ public class FrameFactory {
 	 */
 	private FrameHolder buildPhotCal(String frameType, String photcalId, String filterId) throws Exception {
 		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.PHOTCAL, photcalId, Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
-		this.photCalFactory.getMivotPhotCal(frameType, photcalId, filterId);
-		frameHolder.setFrame(this.photCalFactory.getMivotPhotCal(frameType, photcalId, filterId));
+		String photCalString = null;
+		try {
+			photCalString = this.photCalFactory.getMivotPhotCal(frameType, photcalId, filterId);
+		} catch( MappingError me) {
+			photCalString =  buildLocalFrame(Glossary.CSClass.PHOTCAL, frameType, photcalId).frameXml;
+		}
+		frameHolder.setFrame(photCalString);
 		Cache.storeReferencedModel(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
 		
 		return frameHolder;

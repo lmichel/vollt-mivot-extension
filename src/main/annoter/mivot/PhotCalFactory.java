@@ -33,9 +33,8 @@ public class PhotCalFactory {
     
     public String getMivotPhotCal(String filterName, String photcalId, String filterId) throws Exception {
     	
-    	String svoId = getSVOId(filterName);
-              
-        String response = getFPSResponse(svoId);
+    	String svoId = PhotCalFactory.getSVOId(filterName);
+        String response = PhotCalFactory.getFPSResponse(svoId);
  
         // fix some FPS tweaks
         response = response.replace(
@@ -140,7 +139,7 @@ public class PhotCalFactory {
     	if(filterName.length() == 1) {
     		String filter = Glossary.Filters.map.get(filterName);
         	if( filter == null || filter.length() == 0 ) {
-        		throw new MappingError("No filter name found for abreviation " + filterName);
+        		throw new MappingError("No SVO filter identifier found for abreviation " + filterName);
         	}
         	return filter;
 		} else {
@@ -151,6 +150,7 @@ public class PhotCalFactory {
     public static String getFPSResponse(String svoId) throws MalformedURLException, IOException, MappingError {
     	
         String fpsUrl = Glossary.Url.FPS + svoId;
+        System.out.println("Connect " +  fpsUrl);
         HttpURLConnection connection = (HttpURLConnection) new URL(fpsUrl).openConnection();
         connection.setRequestMethod("GET");
 
