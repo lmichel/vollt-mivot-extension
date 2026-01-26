@@ -29,7 +29,7 @@ public class Cache {
     		System.out.println("DEBUG: " + message);
     	}
     }
-    public static void logInfo(String[] args) {
+    public static void logInfo(String... args) {
     	List<String> list = Arrays.asList(args);
     	String message = String.join(" ", list);
     	if( Cache.logger != null ) {
@@ -38,7 +38,7 @@ public class Cache {
     		System.out.println("INFO: " + message);
     	}
     }
-    public static void logWarning(String[] args) {
+    public static void logWarning(String... args) {
     	List<String> list = Arrays.asList(args);
     	String message = String.join(" ", list);
     	if( Cache.logger != null ) {
@@ -47,7 +47,7 @@ public class Cache {
     		System.out.println("WARNING: " + message);
     	}
     }
-    public static void logError(String[] args) {
+    public static void logError(String... args) {
     	List<String> list = Arrays.asList(args);
     	String message = String.join(" ", list);
     	if( Cache.logger != null ) {

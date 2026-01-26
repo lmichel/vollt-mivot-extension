@@ -96,7 +96,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 		if( this.isQueryMappable(parsedQuery, message) == true ) {
 			Instant start = Instant.now();
 			
-			this.service.getLogger().log(LogLevel.INFO, "MIVOT", "Start writing annotations for table " + tableName, null);
+			Cache.logDebug("Start writing annotations for table ", tableName);
 
 			for(DBColumn col : execReport.resultingColumns) {
 				columnNames.add(col.getADQLName());	
@@ -104,7 +104,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 			MivotAnnotations mivotAnnotations = new MivotAnnotations();
 			String outXml = mivotAnnotations.mapMango(tableName, columnNames);
 			Duration duration = Duration.between(start, Instant.now());
-			System.out.println("Annotations generated in " + duration.toMillis() + " ms");
+			Cache.logDebug("Annotations generated in", duration.toMillis() + " ms");
 			try {
 				out.write(outXml);
 				out.flush();
@@ -112,7 +112,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 				e.printStackTrace();
 			}
 		} else {
-			this.service.getLogger().log(LogLevel.INFO, "MIVOT", message.toString(), null);
+			Cache.logInfo(message.toString());
 			this.writeMappingError(message.toString(), out);			
 		}
 	}
