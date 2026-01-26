@@ -4,6 +4,7 @@ import java.util.*;
 
 import main.annoter.cache.Cache;
 import main.annoter.cache.MappingCache;
+import main.annoter.cache.SessionCache;
 import main.annoter.dm.MangoInstance;
 import main.annoter.dm.Property;
 import main.annoter.meta.UtypeDecoder;
@@ -51,6 +52,8 @@ public class MivotAnnotations {
 	 */
 	public String mivotBlock;
 
+	public SessionCache sessionCache;
+	
 	/**
 	 * Create a new, empty MivotAnnotations collector.
 	 *
@@ -66,6 +69,7 @@ public class MivotAnnotations {
 		this.templatesId = "";
 		this.dmids = new ArrayList<>();
 		this.mivotBlock = "";
+		this.sessionCache = new SessionCache();
 	}
 
 	/**
@@ -267,11 +271,11 @@ public class MivotAnnotations {
 		}
 	}
 
-	public static String mapMango(String table, List<String> selectedColumns) {
-		return mapMango(Arrays.asList(table), selectedColumns);
+	public String mapMango(String table, List<String> selectedColumns) {
+		return this.mapMango(Arrays.asList(table), selectedColumns);
 	}
 
-	public static String mapMango(List<String> tables, List<String> selectedColumns) {
+	public String mapMango(List<String> tables, List<String> selectedColumns) {
 		MappingCache MAPPING_CACHE = MappingCache.getCache();
 		// Build the annotations
 		MivotAnnotations mivotAnnotation = new MivotAnnotations();
@@ -289,13 +293,12 @@ public class MivotAnnotations {
 				}
 			}
 			mi = new MangoInstance(utypeMappedColumn);
-			FrameFactory frameFactory = FrameFactory.getInstance();
-			Cache.resetSession();
+			FrameFactory frameFactory = FrameFactory.getInstance(this.sessionCache);
 			for (String supportedProperty : Glossary.SUPPORTED_PROPERTIES) {
 				// Look for mapping rules for the property in the current table
-				System.out.println("Looking at property: " + supportedProperty);
+				Cache.logDebug("Looking at property: ", supportedProperty);
 				for (String table : tables) {
-					System.out.println(" Check if table: " + table + " " + selectedColumns + " maps it");
+					Cache.logDebug(" Check if table: ", table, selectedColumns.toString(), "maps it");
 
 					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
 							table,
@@ -303,8 +306,8 @@ public class MivotAnnotations {
 							selectedColumns);
 					List<String> constants = new ArrayList<String>();
 					for (String key : propertyMapping.keySet()) {
-						System.out.println(" Found mapping for property " + supportedProperty + " in table " + table
-								+ " with key " + key);
+						Cache.logDebug("Found mapping for property ",supportedProperty ,"in table",
+								table, "with key", key);
 						List<FrameHolder> frameHolders = new ArrayList<>();
 						List<UtypeDecoder> utds = propertyMapping.get(key);
 						for (String cs : utds.get(0).getFrames()) {
@@ -324,8 +327,8 @@ public class MivotAnnotations {
 
 			mivotAnnotation.addModel(Glossary.ModelPrefix.IVOA, Glossary.VodmlUrl.IVOA);
 			mivotAnnotation.addModel(Glossary.ModelPrefix.MANGO, Glossary.VodmlUrl.MANGO);
-			for (String model : Cache.getReferencedModelList() ) {
-				mivotAnnotation.addModel(model, Cache.getReferencedModel(model));
+			for (String model : this.sessionCache.getReferencedModelList() ) {
+				mivotAnnotation.addModel(model, this.sessionCache.getReferencedModel(model));
 			}
 
 			mivotAnnotation.addTemplates(mi);

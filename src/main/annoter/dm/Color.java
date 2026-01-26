@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import main.annoter.meta.Glossary;
-import main.annoter.cache.MappingCache;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.meta.UtypeDecoderBrowser;
 import main.annoter.mivot.FrameHolder;
-import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 import tap.metadata.TAPColumn;
 
@@ -27,7 +25,7 @@ public class Color extends Property {
 	public UtypeDecoderBrowser utypeBrowser;
 	public UtypeDecoder valueUtypeDecoder = null; 
 	public MivotInstance errorInstance = null;
-	@SuppressWarnings("serial")
+
 	public Color(List<UtypeDecoder> utypeDecoders,
 			String tableName,
 			List<FrameHolder> frameHolders,

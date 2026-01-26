@@ -82,8 +82,8 @@ public class TestMivotAnnotations {
 	private static List<String> getFromTable() {
 		MAPPING_CACHE = MappingCache.getCache();
 		MAPPING_CACHE.addTAPTable(basicTable);
-		//MAPPING_CACHE.addTAPTable(photometryTable);
-		//MAPPING_CACHE.addTAPTable(colorTable);
+		MAPPING_CACHE.addTAPTable(photometryTable);
+		MAPPING_CACHE.addTAPTable(colorTable);
 		return Arrays.asList("basic", "photometry", "color");
 		//return Arrays.asList("basic");
 
@@ -96,10 +96,10 @@ public class TestMivotAnnotations {
 		//return Arrays.asList("magnitude_u", "mag_u_errordown", "mag_u_errorup");
 		//return Arrays.asList("magnitude_u", "mag_u_errorup");
 		//return Arrays.asList("color_ur");
-		//return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
-		//  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
-		//		"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
-		return Arrays.asList("otype");
+		return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
+		  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
+				"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
+		//return Arrays.asList("otype");
 
 	}
 
@@ -112,18 +112,18 @@ public class TestMivotAnnotations {
 		List<String> selectedColumns = getSelectedColumns();
 
 		Instant start = Instant.now();
-		String outXml = MivotAnnotations.mapMango(tables, selectedColumns);
+		String outXml = (new MivotAnnotations()).mapMango(tables, selectedColumns);
 		Duration duration = Duration.between(start, Instant.now());
 		System.out.println("Elapsed: " + duration.toMillis() + " ms");
 		System.out.println("=========================");
 		start = Instant.now();
 		
-		String outXml2 = MivotAnnotations.mapMango(tables, selectedColumns);
+		String outXml2 = (new MivotAnnotations()).mapMango(tables, selectedColumns);
 		duration = Duration.between(start, Instant.now());
 		System.out.println("Elapsed: " + duration.toMillis() + " ms");
 		System.out.println(outXml.equals(outXml2));
-		//diffLines(outXml, outXml2);
-		//System.out.println(outXml);
+		diffLines(outXml, outXml2);
+		System.out.println(outXml);
 		System.out.println(outXml2);
 	}
 	

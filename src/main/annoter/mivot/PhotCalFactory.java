@@ -8,11 +8,6 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,7 +24,6 @@ import main.annoter.utils.MivotUtils;
 import main.annoter.utils.XmlUtils;
 
 public class PhotCalFactory {
-    private static final Logger LOGGER = Logger.getLogger(MivotAnnotations.class.getName());    
     
     public String getMivotPhotCal(String filterName, String photcalId, String filterId) throws Exception {
     	

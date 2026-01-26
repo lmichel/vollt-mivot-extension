@@ -12,7 +12,6 @@ import main.annoter.cache.MappingCache;
 import main.annoter.meta.Glossary;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.mivot.FrameHolder;
-import main.annoter.mivot.MappingError;
 import main.annoter.mivot.MivotInstance;
 import tap.metadata.TAPColumn;
 
@@ -25,7 +24,6 @@ public class EpochPosition extends Property {
 	private List<UtypeDecoder> pmErrorUtypes = new ArrayList<>();
 	private List<UtypeDecoder> parallaxErrorUtypes = new ArrayList<>();
 
-	@SuppressWarnings("serial")
 	public EpochPosition(List<UtypeDecoder> utypeDecoders,
 			String tableName,
 			List<FrameHolder> frameHolders,

@@ -4,12 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import main.annoter.cache.Cache;
+import main.annoter.cache.SessionCache;
 import main.annoter.meta.Glossary;
 
 /**
@@ -23,26 +20,23 @@ import main.annoter.meta.Glossary;
  */
 public class FrameFactory {
 	
-	/** Singleton instance. */
-	private static FrameFactory instance;
-
 	private PhotCalFactory photCalFactory = new PhotCalFactory();
+	private SessionCache sessionCache;
 	/**
 	 * Return the singleton instance of the factory.
+	 * @param sessionCache 
 	 *
 	 * @return shared FrameFactory instance
 	 */
-	public static FrameFactory getInstance() {
-		if( instance == null ) {
-			instance = new FrameFactory();
-		}
-		return instance;
+	public static FrameFactory getInstance(SessionCache sessionCache) {
+		return new FrameFactory(sessionCache);
 	}
 	
 	/**
 	 * Private constructor for the singleton.
 	 */
-	private FrameFactory() {
+	private FrameFactory(SessionCache sessionCache) {
+		this.sessionCache = sessionCache;
 	}
 	
 	/**
@@ -66,7 +60,7 @@ public class FrameFactory {
 		String frameId = this.buildID("_".concat(systemClass), frameType);
 		FrameHolder frameHolder = new FrameHolder(systemClass, frameId, null, null);
 				
-		if( Cache.containsGlobalsId(frameId)) {
+		if( this.sessionCache.containsGlobalsId(frameId)) {
 			frameHolder.frameXml = null;
 			return frameHolder;
 		}
@@ -77,7 +71,7 @@ public class FrameFactory {
 			 * related model in the annotations 
 			 */
 			if( frameHolder.modelPrefix != null ) {
-				Cache.storeReferencedModel(frameHolder.modelPrefix, frameHolder.modelUrl);
+				this.sessionCache.storeReferencedModel(frameHolder.modelPrefix, frameHolder.modelUrl);
 			}
 			return frameHolder;
 		}
@@ -85,22 +79,22 @@ public class FrameFactory {
 		switch(systemClass) {
 		case "space":
 		case Glossary.CSClass.SPACE:
-			Cache.storeGlobalsId(frameId);
+			this.sessionCache.storeGlobalsId(frameId);
 			frameHolder = this.buildSpaceFrame(systemClass, frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.PHOTCAL:
-			Cache.storeGlobalsId(frameId);
+			this.sessionCache.storeGlobalsId(frameId);
 			String filterId = frameId.replace("photCal", "photFilter");
-			Cache.storeGlobalsId(filterId);
+			this.sessionCache.storeGlobalsId(filterId);
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.FILTER_HIGH:
 		case Glossary.CSClass.FILTER_LOW:
-			Cache.storeGlobalsId(frameId);
+			this.sessionCache.storeGlobalsId(frameId);
 			filterId = frameId.replace("photCal", "photFilter");
-			Cache.storeGlobalsId(filterId);
+			this.sessionCache.storeGlobalsId(filterId);
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
 			frameHolder.frameId = filterId;
 			// restore the correct system class (squashed by buildPhotCal)
@@ -108,7 +102,7 @@ public class FrameFactory {
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.LOCAL:
-			Cache.storeGlobalsId(frameId);
+			this.sessionCache.storeGlobalsId(frameId);
 			frameHolder = this.buildLocalFrame(systemClass, frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
@@ -191,7 +185,7 @@ public class FrameFactory {
 		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameId, Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
 		frameHolder.setFrame(spaceSys);
 		
-		Cache.storeReferencedModel(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
+		this.sessionCache.storeReferencedModel(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
 		return frameHolder;
 	}
 	
@@ -218,7 +212,7 @@ public class FrameFactory {
 			photCalString =  buildLocalFrame(Glossary.CSClass.PHOTCAL, frameType, photcalId).frameXml;
 		}
 		frameHolder.setFrame(photCalString);
-		Cache.storeReferencedModel(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
+		this.sessionCache.storeReferencedModel(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
 		
 		return frameHolder;
 	}
