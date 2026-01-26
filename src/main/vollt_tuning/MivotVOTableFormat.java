@@ -13,6 +13,7 @@ import adql.parser.ParseException;
 import adql.query.ADQLQuery;
 import adql.query.from.ADQLTable;
 import adql.query.from.FromContent;
+import main.annoter.cache.Cache;
 import main.annoter.cache.MappingCache;
 import main.annoter.dm.EpochPosition;
 import main.annoter.dm.MangoInstance;
@@ -77,11 +78,16 @@ public class MivotVOTableFormat extends VOTableFormat {
 			this.writeMappingError(e.toString(), out);
 			return;
 		}
+		Cache.setLogger(this.service.getLogger());
 		tableName = parsedQuery.getFrom().getName();
 		
 		FromContent from = parsedQuery.getFrom();
 		for( ADQLTable tapTable: from.getTables()) {
 			//MAPPING_CACHE.addADQLTable(tapTable);
+			/*
+			 * Use the hard-coded Simbad mapping meanwhile 
+			 * pseudo UTypes are not set
+			 */
 			MAPPING_CACHE.getFakeMappingCacheForBasic();
 			MAPPING_CACHE.getFakeMappingCacheForFlux();
 		}
@@ -95,7 +101,8 @@ public class MivotVOTableFormat extends VOTableFormat {
 			for(DBColumn col : execReport.resultingColumns) {
 				columnNames.add(col.getADQLName());	
 			}
-			String outXml = MivotAnnotations.mapMango(tableName, columnNames);
+			MivotAnnotations mivotAnnotations = new MivotAnnotations();
+			String outXml = mivotAnnotations.mapMango(tableName, columnNames);
 			Duration duration = Duration.between(start, Instant.now());
 			System.out.println("Annotations generated in " + duration.toMillis() + " ms");
 			try {
@@ -116,8 +123,8 @@ public class MivotVOTableFormat extends VOTableFormat {
 	 */
 	private boolean isQueryMappable(ADQLQuery parsedQuery, StringBuffer message) {
 		FromContent from = parsedQuery.getFrom();
-		if( from.getTables().size() != 1 ) {
-			message.append("Annotation on multi-table queries not implemented yet");
+		if( from.getTables().size() >= 1 ) {
+			message.append("Annotation requires at least one table");
 			return false;
 		}
 		String schema =  from.getTables().get(0).getSchemaName().toLowerCase();

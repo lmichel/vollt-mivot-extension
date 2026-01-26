@@ -1,26 +1,66 @@
 package main.annoter.cache;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import main.annoter.mivot.FrameHolder;
+import tap.log.TAPLog;
+import uws.service.log.UWSLog.LogLevel;
 
 public class Cache {
 	static private Map<String, Class<?> > propertyInstanceCache = new LinkedHashMap<String, Class<?> >();
 	static private Map<String, FrameHolder> frameCache = new LinkedHashMap<String, FrameHolder>();
-	static private Map<String, String> referencedModels = new LinkedHashMap<String, String>();
-	/** Collected frame IDs already created (prevents duplicates). */
-	static private Set<String> globalsIds = new HashSet<String>();
-
+    public static TAPLog logger = null;
 	
-	public static void resetSession() {
-		Cache.referencedModels = new LinkedHashMap<String, String>();
-		Cache.globalsIds = new HashSet<String>();
-	}
+    public static void setLogger(TAPLog tapLog) {
+    	if( tapLog == null ) {
+    		Cache.logger = tapLog;
+    	}
+    }
+    
+    public static void logDebug(String... args) {
+    	List<String> list = Arrays.asList(args);
+    	String message = String.join(" ", list);
+    	if( Cache.logger != null ) {
+    		Cache.logger.log(LogLevel.DEBUG, "MIVOT", message, null);
+    	} else {
+    		System.out.println("DEBUG: " + message);
+    	}
+    }
+    public static void logInfo(String[] args) {
+    	List<String> list = Arrays.asList(args);
+    	String message = String.join(" ", list);
+    	if( Cache.logger != null ) {
+    		Cache.logger.log(LogLevel.INFO, "MIVOT", message, null);
+    	} else {
+    		System.out.println("INFO: " + message);
+    	}
+    }
+    public static void logWarning(String[] args) {
+    	List<String> list = Arrays.asList(args);
+    	String message = String.join(" ", list);
+    	if( Cache.logger != null ) {
+    		Cache.logger.log(LogLevel.WARNING, "MIVOT", message, null);
+    	} else {
+    		System.out.println("WARNING: " + message);
+    	}
+    }
+    public static void logError(String[] args) {
+    	List<String> list = Arrays.asList(args);
+    	String message = String.join(" ", list);
+    	if( Cache.logger != null ) {
+    		Cache.logger.log(LogLevel.ERROR, "MIVOT", message, null);
+    	} else {
+    		System.out.println("ERROR: " + message);
+    	}
+    }
 	
-	public static Class<?> getPropertyClass(String propertyClassName) throws ClassNotFoundException{
+	public static synchronized Class<?> getPropertyClass(String propertyClassName) throws ClassNotFoundException{
 		
 		if( Cache.propertyInstanceCache.containsKey(propertyClassName) == false ) {
 			Cache.propertyInstanceCache.put(
@@ -30,24 +70,6 @@ public class Cache {
 		return  Cache.propertyInstanceCache.get(propertyClassName);
 	}
 	
-	public static String getReferencedModel(String referencedModel) throws ClassNotFoundException {
-		
-		if( Cache.referencedModels.containsKey(referencedModel) ) {
-			return Cache.referencedModels.get(referencedModel);
-		}
-		return null;
-	}
-	
-	public static String storeReferencedModel(String modelPrefix, String modelUrl) {
- 		if( Cache.referencedModels.containsKey(modelPrefix) == false ) {
- 			Cache.referencedModels.put(modelPrefix, modelUrl);
- 		}
- 		return Cache.referencedModels.get(modelPrefix);
-	}
-	
-	public static Set<String> getReferencedModelList() {
-		return Cache.referencedModels.keySet();
-	}
 	public static FrameHolder getFrameHolder(String frameId) {
  		if( Cache.frameCache.containsKey(frameId) ) {
  			return Cache.frameCache.get(frameId);
@@ -55,18 +77,11 @@ public class Cache {
  		return null;
 
 	}
-	public static FrameHolder storeFrameHolder(FrameHolder frameHolder) {
+	public static  synchronized FrameHolder storeFrameHolder(FrameHolder frameHolder) {
 		String frameId = frameHolder.frameId;
  		if( Cache.frameCache.containsKey(frameId) == false ) {
  			Cache.frameCache.put(frameId, frameHolder);
  		}
  		return Cache.frameCache.get(frameId);
-	}
-	
-	public static boolean containsGlobalsId(String globalsId) {
-		return Cache.globalsIds.contains(globalsId);
-	}
-	public static void storeGlobalsId(String globalsId) {
-		Cache.globalsIds.add(globalsId);
 	}
 }
