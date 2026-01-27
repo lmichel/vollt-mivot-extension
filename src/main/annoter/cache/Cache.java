@@ -15,8 +15,8 @@ public class Cache {
     public static TAPLog logger = null;
 	
     public static void setLogger(TAPLog tapLog) {
-    	if( tapLog == null ) {
-    		Cache.logger = tapLog;
+    	if( Cache.logger == null ) {
+        	Cache.logger = tapLog;
     	}
     }
     

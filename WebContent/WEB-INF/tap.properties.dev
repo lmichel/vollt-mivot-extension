@@ -14,8 +14,7 @@ sql_translator=pgsphere
 metadata=db
 
 #ajout de base ou root url
-base_url = https://xcatdb.unistra.fr/xtapdb/
-base_url = http://localhost:8888/xtapdb/
+base_url = http://localhost:8888/coincoin/
 file_manager = local
 file_root_path = Tapfiles
 jdbc_driver=org.postgresql.Driver
@@ -23,4 +22,4 @@ jdbc_driver=org.postgresql.Driver
 default_execution_duration = 3600000
 output_default_limit =10
 #add output_formats
-output_formats={vollt_tuning.MangoFormat}, fits, csv, tsv, text, html, json
+output_formats={main.vollt_tuning.MivotFormat}, fits, csv, tsv, text, html, json

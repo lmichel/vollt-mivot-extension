@@ -121,7 +121,9 @@ public class FrameFactory {
 		
 		InputStream is = getClass().getClassLoader()
 		        .getResourceAsStream("snippets/mango.frame." + frameType + ".xml");
-
+		if( is == null) {
+			throw new MappingError("cannot find local MIVOT snippet: snippets/mango.frame." + frameType + ".xml");
+		}
 		byte[] bytes;
 		try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
 		    int n;
@@ -211,7 +213,7 @@ public class FrameFactory {
 		} catch( MappingError me) {
 			photCalString =  buildLocalFrame(Glossary.CSClass.PHOTCAL, frameType, photcalId).frameXml;
 		}
-		frameHolder.setFrame(photCalString);
+		frameHolder.setFrame(PhotCalFactory.getSimplifiedPhotCal(photCalString));
 		this.sessionCache.storeReferencedModel(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
 		
 		return frameHolder;

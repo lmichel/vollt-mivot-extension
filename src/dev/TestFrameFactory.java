@@ -4,6 +4,7 @@ import main.annoter.cache.SessionCache;
 import main.annoter.mivot.FrameFactory;
 import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MappingError;
+import main.annoter.mivot.PhotCalFactory;
 
 public class TestFrameFactory {
 
@@ -17,7 +18,6 @@ public class TestFrameFactory {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.exit(1);
 		
 		try {
 			FrameHolder fh = ff.createFrame("local=SUM_FLAG");
@@ -41,7 +41,7 @@ public class TestFrameFactory {
 		
 		try {
 			FrameHolder fh = ff.createFrame("photCal=u");
-			System.out.println("Frame ID: " + fh);
+			System.out.println("Frame ID: " + fh.frameXml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

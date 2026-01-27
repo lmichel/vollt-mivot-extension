@@ -185,10 +185,11 @@ public class Glossary {
             map.put("r", "SLOAN/SDSS.r/AB");
             map.put("z", "SLOAN/SDSS.z/AB");
             map.put("g", "SLOAN/SDSS.g/AB");
+            map.put("i", "SLOAN/SDSS.i/AB");
             map.put("G", "GAIA/GAIA3.G/AB");
-            map.put("F444W", "JWST/NIRCam.F444W/Vega");
-            map.put("F150W", "JWST/NIRCam.F150W/Vega");
-            map.put("F200W", "JWST/NIRCam.F200W/Vega");
+            map.put("F444W", "JWST/NIRCam.F444W/AB");
+            map.put("F150W", "JWST/NIRCam.F150W/AB");
+            map.put("F200W", "JWST/NIRCam.F200W/AB");
         }
     }
     

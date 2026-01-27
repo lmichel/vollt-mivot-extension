@@ -271,11 +271,7 @@ public class MivotAnnotations {
 		}
 	}
 
-	public String mapMango(String table, List<String> selectedColumns) {
-		return this.mapMango(Arrays.asList(table), selectedColumns);
-	}
-
-	public String mapMango(List<String> tables, List<String> selectedColumns) {
+	public String mapMango(Map<String, Set<String>> columns) {
 		MappingCache MAPPING_CACHE = MappingCache.getCache();
 		// Build the annotations
 		MivotAnnotations mivotAnnotation = new MivotAnnotations();
@@ -285,9 +281,9 @@ public class MivotAnnotations {
 		MangoInstance mi;
 		try {
 			String utypeMappedColumn = null;
-			for (String table : tables) {
+			for (String table : columns.keySet()) {
 				utypeMappedColumn = MAPPING_CACHE.getUtypeMappedColumn(table, "mango:MangoObject.identifier",
-						selectedColumns);
+						new ArrayList<String>(columns.get(table)));
 				if (utypeMappedColumn != null) {
 					break;
 				}
@@ -297,7 +293,8 @@ public class MivotAnnotations {
 			for (String supportedProperty : Glossary.SUPPORTED_PROPERTIES) {
 				// Look for mapping rules for the property in the current table
 				Cache.logDebug("Looking at property: ", supportedProperty);
-				for (String table : tables) {
+				for (String table : columns.keySet()) {
+					List<String>selectedColumns =new ArrayList<String>(columns.get(table));
 					Cache.logDebug(" Check if table: ", table, selectedColumns.toString(), "maps it");
 
 					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
@@ -339,6 +336,5 @@ public class MivotAnnotations {
 			exception.printStackTrace();
 			mivotAnnotation.setReport(false, "Annotation failure: " + exception);
 		}
-		return mivotAnnotation.mivotBlock;
-	}
+		return mivotAnnotation.mivotBlock;	}
 }

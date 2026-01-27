@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import adql.db.DBColumn;
 import adql.db.DefaultDBTable;
@@ -67,8 +71,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 		this.service.getLogger().log(LogLevel.INFO, "MIVOT", "@ MIVOT", null);
 		String query = execReport.parameters.getQuery();
 
-		String tableName;
-		List<String> columnNames = new ArrayList<String>();
+		Map<String, Set<String>> columns = new LinkedHashMap<String, Set<String>>();
 		
 		ADQLQuery parsedQuery = null;
 		try {
@@ -79,7 +82,6 @@ public class MivotVOTableFormat extends VOTableFormat {
 			return;
 		}
 		Cache.setLogger(this.service.getLogger());
-		tableName = parsedQuery.getFrom().getName();
 		
 		FromContent from = parsedQuery.getFrom();
 		for( ADQLTable tapTable: from.getTables()) {
@@ -96,13 +98,17 @@ public class MivotVOTableFormat extends VOTableFormat {
 		if( this.isQueryMappable(parsedQuery, message) == true ) {
 			Instant start = Instant.now();
 			
-			Cache.logDebug("Start writing annotations for table ", tableName);
 
 			for(DBColumn col : execReport.resultingColumns) {
-				columnNames.add(col.getADQLName());	
+				String table = col.getTable().getADQLName();
+				if( columns.keySet().contains(table) == false) {
+					columns.put(table, new HashSet<String>());
+				}
+				columns.get(table).add(col.getADQLName());
 			}
+			Cache.logDebug("Start writing annotations for tables ", columns.keySet().toString());
 			MivotAnnotations mivotAnnotations = new MivotAnnotations();
-			String outXml = mivotAnnotations.mapMango(tableName, columnNames);
+			String outXml = mivotAnnotations.mapMango(columns);
 			Duration duration = Duration.between(start, Instant.now());
 			Cache.logDebug("Annotations generated in", duration.toMillis() + " ms");
 			try {
@@ -123,14 +129,16 @@ public class MivotVOTableFormat extends VOTableFormat {
 	 */
 	private boolean isQueryMappable(ADQLQuery parsedQuery, StringBuffer message) {
 		FromContent from = parsedQuery.getFrom();
-		if( from.getTables().size() >= 1 ) {
+		if( from.getTables().size() == 0 ) {
 			message.append("Annotation requires at least one table");
 			return false;
 		}
-		String schema =  from.getTables().get(0).getSchemaName().toLowerCase();
-		if( schema.indexOf("tap_schema") != -1 ) {
-			message.append("Queries on TAP_SCHEMA cannot be annotated");
-			return false;
+		if( from.getTables().size() == 1 && from.getTables().get(0).getSchemaName() != null ) {
+			String schema =  from.getTables().get(0).getSchemaName().toLowerCase();
+			if( schema.indexOf("tap_schema") != -1 ) {
+				message.append("Queries on TAP_SCHEMA cannot be annotated");
+				return false;
+			}
 		}
 
 		return true;

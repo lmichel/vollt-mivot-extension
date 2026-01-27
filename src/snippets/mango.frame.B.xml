@@ -30,3 +30,5 @@
     <ATTRIBUTE dmrole="Phot:SpectralLocation.unitexpression" dmtype="ivoa:Unit" value="nm" />
     <ATTRIBUTE dmrole="Phot:SpectralLocation.value" dmtype="ivoa:real" value="445" />
   </INSTANCE>
+</INSTANCE>
+  

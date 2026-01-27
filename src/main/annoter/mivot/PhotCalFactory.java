@@ -5,12 +5,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -18,7 +26,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import main.annoter.cache.Cache;
 import main.annoter.meta.Glossary;
 import main.annoter.utils.MivotUtils;
 import main.annoter.utils.XmlUtils;
@@ -130,21 +140,17 @@ public class PhotCalFactory {
     }
 
     private static String getSVOId(String filterName) throws MappingError {
-    	if(filterName.length() == 1) {
-    		String filter = Glossary.Filters.map.get(filterName);
-        	if( filter == null || filter.length() == 0 ) {
-        		throw new MappingError("No SVO filter identifier found for abreviation " + filterName);
-        	}
-        	return filter;
-		} else {
-			return filterName;
-		}
+    	String filter = Glossary.Filters.map.get(filterName);
+        if( filter == null || filter.length() == 0 ) {
+        	throw new MappingError("No SVO filter identifier found for abreviation " + filterName);
+        }
+        return filter;
 	}
     
     public static String getFPSResponse(String svoId) throws MalformedURLException, IOException, MappingError {
     	
         String fpsUrl = Glossary.Url.FPS + svoId;
-        System.out.println("Connect " +  fpsUrl);
+        Cache.logDebug("Connect " +  fpsUrl);
         HttpURLConnection connection = (HttpURLConnection) new URL(fpsUrl).openConnection();
         connection.setRequestMethod("GET");
 
@@ -169,5 +175,48 @@ public class PhotCalFactory {
             throw new MappingError("FPS service error: " + message);
         }
         return response;
+    }
+    
+    public static String getSimplifiedPhotCal(String xmlPhotCal) throws TransformerException, ParserConfigurationException, SAXException, IOException {
+    	
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(
+        		new InputSource(
+        				new StringReader("<BOIBOITE>\n" + xmlPhotCal +"\n</BOIBOITE>\n" )));
+
+        // Get root element
+        Element root = doc.getDocumentElement();
+
+        NodeList personList = doc.getElementsByTagName("INSTANCE");
+        String[] dmRolesToremove = {"Phot:PhotometryFilter.transmissionCurve",
+        		"Phot:PhotCal.zeroPoint", "Phot:PhotCal.magnitudeSystem",
+        		"Phot:PhotometryFilter.bandwidth"};
+    
+        for (String dmRoleToremove : dmRolesToremove) {
+        	for (int i = 0; i < personList.getLength(); i++) {
+        		Node node = personList.item(i);
+        		if (node.getNodeType() == Node.ELEMENT_NODE) {
+        			Element person = (Element) node;
+        			String id = person.getAttribute("dmrole");
+        			if (dmRoleToremove.equals(id)
+        					) { 
+        				person.getParentNode().removeChild(person);
+        			}
+                }
+        	}       
+        }
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(doc), new StreamResult(writer));
+        String xmlString = writer.toString();
+        xmlString = xmlString.replace("<BOIBOITE>\n", "")
+        		.replace("\n</BOIBOITE>\n", "")
+        		.replaceAll("<\\?xml.*\\?>", "")
+        		.replaceAll("\n[ ]*\n", "\n")
+        		.replaceAll("\n[ ]*\n", "\n");
+        return xmlString;
     }
 }
