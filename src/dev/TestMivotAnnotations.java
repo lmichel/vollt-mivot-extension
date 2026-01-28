@@ -1,24 +1,18 @@
 package dev;
 
-import main.annoter.dm.EpochPosition;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import main.annoter.cache.MappingCache;
-import main.annoter.dm.Brightness;
-import main.annoter.dm.MangoInstance;
-import main.annoter.dm.Property;
-import main.annoter.meta.Glossary;
-import main.annoter.meta.UtypeDecoder;
-import main.annoter.mivot.FrameFactory;
-import main.annoter.mivot.FrameHolder;
 import main.annoter.mivot.MivotAnnotations;
 import tap.metadata.TAPColumn;
 import tap.metadata.TAPTable;
-
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.time.*;
 
 public class TestMivotAnnotations {
 	private static MappingCache MAPPING_CACHE;
@@ -77,54 +71,54 @@ public class TestMivotAnnotations {
 		colorTable.addColumn(new TAPColumn("color_ur", "description", "mag", "ucd",
 				"mango:Color.value[CS.photFilterHigh=u CS.photFilterLow=r CT.mode=colorindex]"));
 
-	}
-
-	private static List<String> getFromTable() {
 		MAPPING_CACHE = MappingCache.getCache();
 		MAPPING_CACHE.addTAPTable(basicTable);
 		MAPPING_CACHE.addTAPTable(photometryTable);
 		MAPPING_CACHE.addTAPTable(colorTable);
-		return Arrays.asList("basic", "photometry", "color");
-		//return Arrays.asList("basic");
 
 	}
 
-	private static List<String> getSelectedColumns() {
+	private static Map<String, Set<String>>  getSelectedColumns() {
 		//return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
 		//		"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel");
 		//return Arrays.asList("magnitude_u", "mag_error_u", "magnitude_k", "mag_k_error");
 		//return Arrays.asList("magnitude_u", "mag_u_errordown", "mag_u_errorup");
 		//return Arrays.asList("magnitude_u", "mag_u_errorup");
 		//return Arrays.asList("color_ur");
-		return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
-		  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
-				"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
+		//return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
+		//  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
+		//		"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
 		//return Arrays.asList("otype");
+		Map<String, Set<String>> basicTableMap = new LinkedHashMap<String, Set<String>>();
+		basicTableMap.put("basic", new HashSet<String>(
+				Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
+				          	  "pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel")));
+		basicTableMap.put("photometry", new HashSet<String>(
+				Arrays.asList("magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error")));
+		basicTableMap.put("color", new HashSet<String>(
+				Arrays.asList("color_ur")));
+		return basicTableMap;
 
 	}
 
 	public static void main(String[] args) throws Exception {
 		// to be done at service startup
 		buildCache();
-
 		// get metadata from the parser
-		 List<String> tables = getFromTable();
-		List<String> selectedColumns = getSelectedColumns();
+		 Map<String, Set<String>> selectedColumns = getSelectedColumns();
 
 		Instant start = Instant.now();
-		String outXml = (new MivotAnnotations()).mapMango(tables, selectedColumns);
+		String outXml = (new MivotAnnotations()).mapMango(selectedColumns);
 		Duration duration = Duration.between(start, Instant.now());
 		System.out.println("Elapsed: " + duration.toMillis() + " ms");
 		System.out.println("=========================");
 		start = Instant.now();
 		
-		String outXml2 = (new MivotAnnotations()).mapMango(tables, selectedColumns);
+		String outXml2 = (new MivotAnnotations()).mapMango(selectedColumns);
 		duration = Duration.between(start, Instant.now());
 		System.out.println("Elapsed: " + duration.toMillis() + " ms");
-		System.out.println(outXml.equals(outXml2));
+		System.out.println("Are both output identical? " + outXml.equals(outXml2));
 		diffLines(outXml, outXml2);
-		System.out.println(outXml);
-		System.out.println(outXml2);
 	}
 	
 	public static void diffLines(String a, String b) {
