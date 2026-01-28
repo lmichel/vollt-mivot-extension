@@ -169,7 +169,9 @@ public class FrameFactory {
         MivotInstance spaceFrame = new MivotInstance(Glossary.ModelPrefix.COORDS + ":SpaceFrame",
 					Glossary.ModelPrefix.COORDS + ":PhysicalCoordSys.frame", null);
 
-        spaceFrame.addAttribute(Glossary.IvoaType.STRING, Glossary.ModelPrefix.COORDS + ":SpaceFrame.spaceRefFrame", spaceRefFrame, null);
+        spaceFrame.addAttribute(Glossary.IvoaType.STRING,
+        		Glossary.ModelPrefix.COORDS + ":SpaceFrame.spaceRefFrame",
+        		"*" + spaceRefFrame, null);
 
         if (equinox != null) {
             spaceFrame.addAttribute(Glossary.ModelPrefix.COORDS + ":Epoch",
@@ -180,7 +182,9 @@ public class FrameFactory {
 				Glossary.ModelPrefix.COORDS + ":StdRefLocation",
 				Glossary.ModelPrefix.COORDS + ":SpaceFrame.refPosition", null);
 
-        refLoc.addAttribute(Glossary.IvoaType.STRING, Glossary.ModelPrefix.COORDS + ":StdRefLocation.position", refPosition, null);
+        refLoc.addAttribute(Glossary.IvoaType.STRING,
+        		Glossary.ModelPrefix.COORDS + ":StdRefLocation.position",
+        		"*" + refPosition, null);
    
         spaceFrame.addInstance(refLoc);
         spaceSys.addInstance(spaceFrame);

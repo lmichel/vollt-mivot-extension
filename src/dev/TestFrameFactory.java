@@ -40,7 +40,7 @@ public class TestFrameFactory {
 		}
 		
 		try {
-			FrameHolder fh = ff.createFrame("photCal=u");
+			FrameHolder fh = ff.createFrame("photCal=V");
 			System.out.println("Frame ID: " + fh.frameXml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

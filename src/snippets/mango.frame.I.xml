@@ -2,7 +2,7 @@
 <INSTANCE dmid="_photCal_I" dmtype="Phot:PhotCal">
   <!-- WARNING The photometric system may vary from a data row to another -->
   <ATTRIBUTE dmrole="Phot:PhotCal.identifier" dmtype="ivoa:string" value="I" />
-  <REFERENCE dmid="_photFilter_I" dmrole="Phot:PhotCal.photometryFilter" />
+  <REFERENCE dmref="_photFilter_I" dmrole="Phot:PhotCal.photometryFilter" />
 </INSTANCE>
 <INSTANCE dmid="_photFilter_I" dmtype="Phot:photometryFilter">
   <ATTRIBUTE dmrole="Phot:PhotometryFilter.fpsIdentifier" dmtype="ivoa:string" value="mango://local/I" />

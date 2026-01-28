@@ -13,6 +13,8 @@ public class TestPhotCal {
 		System.out.println(fcf.getMivotPhotFilter("SLOAN/SDSS.u/Vega"));
 		System.out.println(fcf.getMivotPhotCal("SLOAN/SDSS.u/Vega", "calid", "filterid"));
 		System.out.println("--------------");
+		System.out.println(fcf.getMivotPhotCal("V", "calid", "filterid"));
+		System.out.println("--------------");
     }
 
 	

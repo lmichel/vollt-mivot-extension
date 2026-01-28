@@ -37,7 +37,7 @@ public class MangoInstance extends MivotInstance{
         if (this.dmid != null) {
             String[] refOrVal = MivotUtils.getRefOrLiteral(dmid);
             String value = refOrVal[0] != null ? refOrVal[0] : refOrVal[1];
-            mangoObject.addAttribute("mango:MangoObject.identifier", Glossary.IvoaType.STRING, value, null);
+            mangoObject.addAttribute(Glossary.IvoaType.STRING, "mango:MangoObject.identifier", value, null);
         }
 
         if (this.withOrigin) {

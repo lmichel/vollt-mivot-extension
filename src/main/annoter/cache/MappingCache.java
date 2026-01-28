@@ -185,15 +185,15 @@ public class MappingCache {
 		tapColumns.add(new TAPColumn("rvz_radvel", "description", "km / s", "ucd",
 				"mango:EpochPosition.radialVelocity[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("coo_err_maj", "description", "mas", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.majorAxis[CS.spaceSys=ICRS]"));
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.semiMajorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("coo_err_min", "description", "mas", "ucd",
-				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.minorAxis[CS.spaceSys=ICRS]"));
+				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.semiMinorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("coo_err_angle", "description", "deg", "ucd",
 				"mango:EpochPosition.errors.position/mango:error.PErrorEllipse.angle[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pm_err_maj", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.majorAxis[CS.spaceSys=ICRS]"));
+				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.semiMajorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pm_err_min", "description", "mas / yr", "ucd",
-				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.minorAxis[CS.spaceSys=ICRS]"));
+				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.semiMinorAxis[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pm_err_angle", "description", "deg", "ucd",
 				"mango:EpochPosition.errors.properMotion/mango:error.PErrorEllipse.angle[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("otype", "Objet type", "", "",

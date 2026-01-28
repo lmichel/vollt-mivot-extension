@@ -22,7 +22,7 @@ public class PropertyError extends FlatInstance {
 	// Confidence level between 0 (exclusive) and 1 (inclusive). Defaults to 0.68 when out of range.
 	private double confidenceLevel;
 	protected String dmrole;
-	protected String hostClass = "mango:error";
+	protected String hostClass = "mango:error.PropertyError";
 ;	protected MivotInstance errorMivotInstance;
 
 	/**
@@ -72,7 +72,7 @@ public class PropertyError extends FlatInstance {
 				"*" + this.distribtion,
 				null);
 		this.errorMivotInstance.addAttribute(
-				"ivoa:string",
+				"ivoa:real",
 				this.hostClass + ".confidenceLevel",
 				"*" + this.confidenceLevel,
 				null);

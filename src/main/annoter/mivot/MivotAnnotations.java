@@ -336,5 +336,6 @@ public class MivotAnnotations {
 			exception.printStackTrace();
 			mivotAnnotation.setReport(false, "Annotation failure: " + exception);
 		}
-		return mivotAnnotation.mivotBlock;	}
+		return "<RESOURCE type=\"meta\">\n" + mivotAnnotation.mivotBlock + "\n</RESOURCE>\n";	
+	}
 }

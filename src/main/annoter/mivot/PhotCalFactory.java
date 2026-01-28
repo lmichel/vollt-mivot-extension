@@ -102,7 +102,7 @@ public class PhotCalFactory {
 
 		// Create a REFERENCE node
 		Element referenceNode = doc.createElement("REFERENCE");
-		referenceNode.setAttribute("dmid", filterId);
+		referenceNode.setAttribute("dmref", filterId);
 		referenceNode.setAttribute("dmrole", "Phot:PhotCal.photometryFilter");
         doc.getElementsByTagName("INSTANCE").item(0).appendChild(referenceNode);
 
@@ -179,14 +179,12 @@ public class PhotCalFactory {
     
     public static String getSimplifiedPhotCal(String xmlPhotCal) throws TransformerException, ParserConfigurationException, SAXException, IOException {
     	
+    	xmlPhotCal = xmlPhotCal.replaceAll("Phot\\:photometryFilter", "Phot:PhotometryFilter");
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(
         		new InputSource(
         				new StringReader("<BOIBOITE>\n" + xmlPhotCal +"\n</BOIBOITE>\n" )));
-
-        // Get root element
-        Element root = doc.getDocumentElement();
 
         NodeList personList = doc.getElementsByTagName("INSTANCE");
         String[] dmRolesToremove = {"Phot:PhotometryFilter.transmissionCurve",
