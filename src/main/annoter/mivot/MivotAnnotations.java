@@ -12,8 +12,17 @@ import main.annoter.utils.XmlUtils;
 import main.annoter.meta.Glossary;
 
 /**
- * Collect all annotation components and put them together to build the
- * annotation block (as a String)
+ * Collector for building a MIVOT annotation block.
+ *
+ * Responsibilities:
+ * - Collect MODEL, GLOBALS and TEMPLATES fragments produced during mapping.
+ * - Track generated DMIDs to avoid duplicates when assembling fragments.
+ * - Build a final pretty-printed <VODML> MIVOT block via {@link #buildMivotBlock(String)}.
+ *
+ * Notes:
+ * - This class is a simple in-memory assembler; it does not persist state.
+ * - The mapping/report status controls whether collected fragments are kept
+ *   or cleared when a mapping failure is detected.
  */
 public class MivotAnnotations {
 	/** Map of model prefix -> model VODML URL (used to build <MODEL> entries). */
@@ -48,7 +57,7 @@ public class MivotAnnotations {
 
 	/**
 	 * Final assembled MIVOT block as a pretty-printed XML string (built by
-	 * buildMivotBlock()).
+	 * {@link #buildMivotBlock(String)}).
 	 */
 	public String mivotBlock;
 
@@ -93,10 +102,12 @@ public class MivotAnnotations {
 	}
 
 	/**
-	 * Return an unmodifiable view of the collected DMIDs.
+	 * Return the collected DMIDs.
 	 *
-	 * @return a List of DMIDs (modifiable copy of the internal list is recommended
-	 *         by caller)
+	 * Note: this returns the internal list reference. Callers that need to
+	 * mutate the returned list should create a defensive copy.
+	 *
+	 * @return a List of DMIDs
 	 */
 	public List<String> getDmids() {
 		return this.dmids;
@@ -133,7 +144,7 @@ public class MivotAnnotations {
 		for (Map.Entry<String, String> entry : models.entrySet()) {
 			if (entry.getValue() != null && !entry.getValue().isEmpty()) {
 				sb.append("<MODEL name=\"").append(entry.getKey()).append("\" url=\"").append(entry.getValue())
-						.append("\" />\n");
+					.append("\" />\n");
 			} else {
 				sb.append("<MODEL name=\"").append(entry.getKey()).append("\" />\n");
 			}
@@ -181,11 +192,16 @@ public class MivotAnnotations {
 	}
 
 	/**
-	 * Build a complete MIVOT blocks from all element stored in the current instance
-	 * 
-	 * @param templatesId ID of the mapped table (optional) The first table is taken
-	 *                    if null
-	 * @throws Exception
+	 * Build a complete MIVOT block from all elements stored in the current instance.
+	 *
+	 * This method assembles REPORT, MODEL, GLOBALS and TEMPLATES sections and
+	 * pretty-prints the resulting XML. If templatesId is provided it will be used
+	 * as the tableref attribute for the TEMPLATES block; otherwise any previously
+	 * set templatesId is used.
+	 *
+	 * @param templatesId ID of the mapped table (optional). If null, the current
+	 *                    templatesId is preserved.
+	 * @throws Exception on XML processing errors
 	 */
 	public void buildMivotBlock(String templatesId) throws Exception {
 		if (templatesId != null) {
@@ -204,10 +220,14 @@ public class MivotAnnotations {
 	}
 
 	/**
-	 * Add a MIVOT element in TEMPLATES
-	 * 
+	 * Add a MIVOT element into the TEMPLATES collection.
+	 *
+	 * Accepts either a {@link MivotInstance} (preferred) or a raw XML String.
+	 * When a MivotInstance is provided its dmid (if present) is recorded to
+	 * prevent duplicate IDs.
+	 *
 	 * @param instance MivotInstance or string serialization of an instance
-	 * @throws Exception
+	 * @throws Exception when the provided object is of an unsupported type
 	 */
 	public void addTemplates(Object instance) throws Exception {
 		if (instance instanceof MivotInstance) {
@@ -223,10 +243,14 @@ public class MivotAnnotations {
 	}
 
 	/**
-	 * Add a MIVOT element in GLOBALS
-	 * 
+	 * Add a MIVOT element into the GLOBALS collection.
+	 *
+	 * Accepts either a {@link MivotInstance} or a raw XML String. When a
+	 * MivotInstance is provided its dmid (if present) is recorded to prevent
+	 * duplicate IDs.
+	 *
 	 * @param instance MivotInstance or string serialization of an instance
-	 * @throws Exception
+	 * @throws Exception when the provided object is of an unsupported type
 	 */
 	public void addGlobals(Object instance) throws Exception {
 		if (instance instanceof MivotInstance) {
@@ -243,7 +267,7 @@ public class MivotAnnotations {
 
 	/**
 	 * Add a <MODEL> element
-	 * 
+	 *
 	 * @param name model name, this used as VODML prefix
 	 * @param url  points on the model VODML file
 	 */
@@ -254,13 +278,12 @@ public class MivotAnnotations {
 	/**
 	 * Set the mapping/report status and message.
 	 *
+	 * If status is false, GLOBALS and TEMPLATES collections are cleared to avoid
+	 * publishing invalid mappings. Implementations may want to add logging when
+	 * failures occur to help diagnosis.
+	 *
 	 * @param status  mapping status (true = OK, false = FAILED)
 	 * @param message human-readable report message (free text)
-	 *
-	 *                If status is false, GLOBALS and TEMPLATES collections are
-	 *                cleared to avoid publishing invalid mappings. Consider adding
-	 *                logging here to record the failure or the reason for the
-	 *                report message.
 	 */
 	public void setReport(boolean status, String message) {
 		this.reportStatus = status;
@@ -271,6 +294,25 @@ public class MivotAnnotations {
 		}
 	}
 
+	/**
+	 * Map database columns to a MANGO/MIVOT annotation and return the assembled
+	 * RESOURCE meta block.
+	 *
+	 * Process overview:
+	 * - Query the MappingCache for relevant utype-to-column mappings per table.
+	 * - Build a MangoInstance populated with mapped Property objects and
+	 *   corresponding frame GLOBALS sections.
+	 * - Add necessary MODEL declarations and the generated MangoInstance to
+	 *   the TEMPLATES collection, then build the final MIVOT block.
+	 *
+	 * This method catches internal exceptions, sets the report status to
+	 * FAILED on errors and returns a RESOURCE element containing the report
+	 * (instead of propagating the exception).
+	 *
+	 * @param columns map of table name -> set of column names available for mapping
+	 * @return String containing a <RESOURCE type="meta"> wrapper with the generated
+	 *         MIVOT block
+	 */
 	public String mapMango(Map<String, Set<String>> columns) {
 		MappingCache MAPPING_CACHE = MappingCache.getCache();
 		// Build the annotations
@@ -283,7 +325,7 @@ public class MivotAnnotations {
 			String utypeMappedColumn = null;
 			for (String table : columns.keySet()) {
 				utypeMappedColumn = MAPPING_CACHE.getUtypeMappedColumn(table, "mango:MangoObject.identifier",
-						new ArrayList<String>(columns.get(table)));
+					new ArrayList<String>(columns.get(table)));
 				if (utypeMappedColumn != null) {
 					break;
 				}
@@ -298,9 +340,9 @@ public class MivotAnnotations {
 					Cache.logDebug(" Check if table: ", table, selectedColumns.toString(), "maps it");
 
 					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
-							table,
-							"mango:" + supportedProperty,
-							selectedColumns);
+						table,
+						"mango:" + supportedProperty,
+						selectedColumns);
 					List<String> constants = new ArrayList<String>();
 					for (String key : propertyMapping.keySet()) {
 						Cache.logDebug("Found mapping for property ",supportedProperty ,"in table",

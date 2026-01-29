@@ -11,29 +11,44 @@ import main.annoter.meta.Glossary;
 
 /**
  * Factory responsible for creating FrameHolder objects from UCD/UTD coordinate
- * system strings. Implements a simple singleton to cache already created IDs
- * and models.
+ * system descriptor strings.
  *
- * Expected input for {@link #createFrame(String)} is a string of the form
- * "system=frameType" (for example "space=ICRS(2000)"). The factory will
- * parse the frameType and build the appropriate MIVOT instances.
+ * Purpose:
+ * - Parse compact frame descriptors (e.g. "space=ICRS(2000)") and produce
+ *   fully populated {@link FrameHolder} instances containing the frame XML
+ *   (as a string) and model metadata.
+ * - Reuse previously generated frames via a shared Cache to avoid duplicate
+ *   work. Note: this class itself does not implement a JVM-level singleton;
+ *   callers typically obtain an instance via {@link #getInstance(SessionCache)}
+ *   to propagate session-scoped model references.
+ *
+ * Important behavior:
+ * - Files for local frames are read from the classpath under
+ *   "snippets/mango.frame.<type>.xml".
+ * - Generated frames are stored in a shared Cache if their XML is non-null.
  */
 public class FrameFactory {
 	
 	private PhotCalFactory photCalFactory = new PhotCalFactory();
 	private SessionCache sessionCache;
 	/**
-	 * Return the singleton instance of the factory.
-	 * @param sessionCache 
+	 * Return an instance of the factory bound to a SessionCache.
 	 *
-	 * @return shared FrameFactory instance
+	 * The SessionCache lets the factory record which models a request references
+	 * so the calling code can include appropriate MODEL declarations in the
+	 * final MIVOT output.
+	 *
+	 * @param sessionCache session-scoped cache for referenced models and IDs
+	 * @return a FrameFactory instance that uses the provided SessionCache
 	 */
 	public static FrameFactory getInstance(SessionCache sessionCache) {
 		return new FrameFactory(sessionCache);
 	}
 	
 	/**
-	 * Private constructor for the singleton.
+	 * Construct a new FrameFactory bound to the provided SessionCache.
+	 *
+	 * @param sessionCache session-scoped cache used to record referenced models
 	 */
 	private FrameFactory(SessionCache sessionCache) {
 		this.sessionCache = sessionCache;
@@ -42,13 +57,22 @@ public class FrameFactory {
 	/**
 	 * Create a FrameHolder from a combined system=frameType string.
 	 *
-	 * The method splits the input on the first '=' character. The left part is
-	 * treated as the system class (for example "space" or "photCal") and the
-	 * right part is the frame descriptor passed to the specific builder.
+	 * Behavior summary:
+	 * - The method splits the input on the first '='; the left part is the
+	 *   system class (e.g. "space", "photCal", "local") and the right part
+	 *   is the frame descriptor.
+	 * - If the frame id has already been recorded in the session cache the
+	 *   returned FrameHolder will have a null frameXml (indicating the frame is
+	 *   already emitted elsewhere and only a reference is required).
+	 * - If the frame is present in the shared Cache, the cached FrameHolder is
+	 *   returned and its model references are registered in the session cache.
+	 * - Otherwise the appropriate builder is invoked depending on the system
+	 *   class.
 	 *
-	 * @param utdCS string in the form "system=frameType"
-	 * @return a FrameHolder containing the constructed frame or null frameXml when
-	 *         the id was already created
+	 * @param utdCS string in the form "system=frameType" (for example
+	 *              "space=ICRS(2000)")
+	 * @return a FrameHolder containing the constructed frame; frameXml may be
+	 *         null to signal the frame was already recorded
 	 * @throws Exception on parsing or mapping errors (MappingError for unknown system)
 	 */
 	public FrameHolder createFrame(String utdCS) throws Exception {
@@ -60,15 +84,18 @@ public class FrameFactory {
 		String frameId = this.buildID("_".concat(systemClass), frameType);
 		FrameHolder frameHolder = new FrameHolder(systemClass, frameId, null, null);
 				
+		// If the session already recorded the id as global, we don't need to
+		// produce the frame XML again; return a holder with null frameXml.
 		if( this.sessionCache.containsGlobalsId(frameId)) {
 			frameHolder.frameXml = null;
 			return frameHolder;
 		}
 		
+		// If another request already created and cached the frame, reuse it.
 		if( (frameHolder = Cache.getFrameHolder(frameId)) != null ) {
 			/*
 			 * Although the frame is already in cache, we must reference the 
-			 * related model in the annotations 
+			 * related model in the annotations so callers can emit MODEL entries.
 			 */
 			if( frameHolder.modelPrefix != null ) {
 				this.sessionCache.storeReferencedModel(frameHolder.modelPrefix, frameHolder.modelUrl);
@@ -79,11 +106,13 @@ public class FrameFactory {
 		switch(systemClass) {
 		case "space":
 		case Glossary.CSClass.SPACE:
+			// Mark the ID as global in the session and build the space frame
 			this.sessionCache.storeGlobalsId(frameId);
 			frameHolder = this.buildSpaceFrame(systemClass, frameType, frameId);
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.PHOTCAL:
+			// Photometric calibration frames come with an associated filter
 			this.sessionCache.storeGlobalsId(frameId);
 			String filterId = frameId.replace("photCal", "photFilter");
 			this.sessionCache.storeGlobalsId(filterId);
@@ -92,16 +121,20 @@ public class FrameFactory {
 			return frameHolder;
 		case Glossary.CSClass.FILTER_HIGH:
 		case Glossary.CSClass.FILTER_LOW:
+			// These are filter-only descriptors; build the photcal and adjust ids
 			this.sessionCache.storeGlobalsId(frameId);
 			filterId = frameId.replace("photCal", "photFilter");
 			this.sessionCache.storeGlobalsId(filterId);
 			frameHolder = this.buildPhotCal(frameType, frameId, filterId);
+			// The produced holder corresponds to the filter id rather than the
+			// photcal id (buildPhotCal uses photcalId internally).
 			frameHolder.frameId = filterId;
 			// restore the correct system class (squashed by buildPhotCal)
  			frameHolder.systemClass = systemClass;
 			this.storeInCache(frameHolder);
 			return frameHolder;
 		case Glossary.CSClass.LOCAL:
+			// Local frames are loaded from classpath snippets
 			this.sessionCache.storeGlobalsId(frameId);
 			frameHolder = this.buildLocalFrame(systemClass, frameType, frameId);
 			this.storeInCache(frameHolder);
@@ -111,12 +144,30 @@ public class FrameFactory {
 		}
 	}
 	
+	/**
+	 * Store the given FrameHolder in the shared Cache if it contains XML.
+	 *
+	 * The Cache is used to avoid reconstructing identical frames across
+	 * different requests.
+	 */
 	private void storeInCache(FrameHolder frameHolder) {
 		if(frameHolder.frameXml != null) {
 			Cache.storeFrameHolder(frameHolder);
 		}
 	}
 	
+	/**
+	 * Build a FrameHolder from a local snippet file located in the classpath.
+	 *
+	 * The file name convention is: snippets/mango.frame.<frameType>.xml
+	 *
+	 * @param systemClass typically Glossary.CSClass.LOCAL
+	 * @param frameType name of the snippet file without extension
+	 * @param frameId id to assign to the resulting FrameHolder
+	 * @return FrameHolder with its frameXml filled from the snippet
+	 * @throws IOException when reading the resource fails
+	 * @throws MappingError when the snippet is missing
+	 */
 	private FrameHolder buildLocalFrame(String systemClass, String frameType, String frameId) throws IOException, MappingError {
 		
 		InputStream is = getClass().getClassLoader()
@@ -132,7 +183,7 @@ public class FrameFactory {
 		        buffer.write(data, 0, n);
 		    }
 		    bytes = buffer.toByteArray();
-		}		
+		}       
 		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.LOCAL, frameId, null, null);
 		frameHolder.setFrame(new String(bytes, StandardCharsets.UTF_8));
 		return frameHolder;
@@ -170,8 +221,8 @@ public class FrameFactory {
 					Glossary.ModelPrefix.COORDS + ":PhysicalCoordSys.frame", null);
 
         spaceFrame.addAttribute(Glossary.IvoaType.STRING,
-        		Glossary.ModelPrefix.COORDS + ":SpaceFrame.spaceRefFrame",
-        		"*" + spaceRefFrame, null);
+				Glossary.ModelPrefix.COORDS + ":SpaceFrame.spaceRefFrame",
+				"*" + spaceRefFrame, null);
 
         if (equinox != null) {
             spaceFrame.addAttribute(Glossary.ModelPrefix.COORDS + ":Epoch",
@@ -183,14 +234,16 @@ public class FrameFactory {
 				Glossary.ModelPrefix.COORDS + ":SpaceFrame.refPosition", null);
 
         refLoc.addAttribute(Glossary.IvoaType.STRING,
-        		Glossary.ModelPrefix.COORDS + ":StdRefLocation.position",
-        		"*" + refPosition, null);
+				Glossary.ModelPrefix.COORDS + ":StdRefLocation.position",
+				"*" + refPosition, null);
    
         spaceFrame.addInstance(refLoc);
         spaceSys.addInstance(spaceFrame);
 		FrameHolder frameHolder = new FrameHolder(Glossary.CSClass.SPACE, frameId, Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
 		frameHolder.setFrame(spaceSys);
 		
+		// Register the COORDS model as referenced for the current session so
+		// buildMivotBlock will include a MODEL declaration.
 		this.sessionCache.storeReferencedModel(Glossary.ModelPrefix.COORDS, Glossary.VodmlUrl.COORDS);
 		return frameHolder;
 	}
@@ -202,10 +255,9 @@ public class FrameFactory {
 	 * e.g. "ABMAG" or "VEGAMAG". The method constructs the appropriate
 	 * MivotInstance object and registers the PHOT model if not already present.
 	 *
-	 * @param systemValue descriptor of the photometric calibration
+	 * @param frameType descriptor of the photometric calibration
 	 * @param photcalId identifier to assign to the constructed frame
 	 * @param filterId identifier to assign to the associated filter
-	 * @param filterId2 
 	 * @return populated FrameHolder for the photometric calibration
 	 * @throws Exception on mapping problems
 	 */
@@ -215,8 +267,10 @@ public class FrameFactory {
 		try {
 			photCalString = this.photCalFactory.getMivotPhotCal(frameType, photcalId, filterId);
 		} catch( MappingError me) {
+			// If remote FPS mapping fails, fall back to a local snippet
 			photCalString =  buildLocalFrame(Glossary.CSClass.PHOTCAL, frameType, photcalId).frameXml;
 		}
+		// Simplify the PhotCal XML to remove verbose elements before storing
 		frameHolder.setFrame(PhotCalFactory.getSimplifiedPhotCal(photCalString));
 		this.sessionCache.storeReferencedModel(Glossary.ModelPrefix.PHOT, Glossary.VodmlUrl.PHOT);
 		

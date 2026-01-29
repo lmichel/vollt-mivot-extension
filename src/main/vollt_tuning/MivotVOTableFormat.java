@@ -4,31 +4,23 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import adql.db.DBColumn;
-import adql.db.DefaultDBTable;
 import adql.parser.ParseException;
 import adql.query.ADQLQuery;
 import adql.query.from.ADQLTable;
 import adql.query.from.FromContent;
 import main.annoter.cache.Cache;
 import main.annoter.cache.MappingCache;
-import main.annoter.dm.EpochPosition;
-import main.annoter.dm.MangoInstance;
-import main.annoter.meta.Glossary;
 import main.annoter.mivot.MivotAnnotations;
 import tap.ServiceConnection;
 import tap.TAPException;
 import tap.TAPExecutionReport;
 import tap.formatter.VOTableFormat;
-import tap.metadata.TAPColumn;
-import tap.metadata.TAPTable;
 import uk.ac.starlink.votable.DataFormat;
 import uk.ac.starlink.votable.VOTableVersion;
 import uws.service.log.UWSLog.LogLevel;
@@ -153,7 +145,6 @@ public class MivotVOTableFormat extends VOTableFormat {
 			out.flush();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
