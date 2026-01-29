@@ -13,29 +13,45 @@ import main.annoter.mivot.MivotInstance;
  * confidence level defaults to 0.68 when an invalid value is provided.</p>
  *
  * <p>Note: the field name "distribtion" contains a historical misspelling that
- * is retained here for backward compatibility with existing serialized data
- * and external code that may reference the same property name.</p>
+ * is intentionally retained for backward compatibility with existing serialized
+ * data and external code that may reference the same property name.</p>
  */
 public class PropertyError extends FlatInstance {
-	// The (historically misspelled) distribution name. Defaults to "Gaussian" when null.
+	/**
+	 * The (historically misspelled) distribution name. Defaults to "Gaussian" when null.
+	 */
 	private String distribtion;
-	// Confidence level between 0 (exclusive) and 1 (inclusive). Defaults to 0.68 when out of range.
+	
+	/**
+	 * Confidence level between 0 (exclusive) and 1 (inclusive). Defaults to 0.68 when out of range.
+	 */
 	private double confidenceLevel;
+
+	/** DM role assigned to the produced error instance. Provided by callers. */
 	protected String dmrole;
+
+	/** Fully qualified host class used as attribute prefix for statistical info. */
 	protected String hostClass = "mango:error.PropertyError";
-;	protected MivotInstance errorMivotInstance;
+
+	/** Container instance built during getMivotInstance(). */
+	protected MivotInstance errorMivotInstance;
 
 	/**
 	 * Create a PropertyError with a distribution name and a confidence level.
 	 *
+	 * @param dmrole role used for the produced error instance (e.g. "mango:...")
 	 * @param distribution the name of the error distribution (e.g. "Gaussian"). If null, defaults to "Gaussian".
-	 * @param confidenceLevel the confidence level as a fraction (0 &lt; level &le; 1). If out of range (<=0 or &gt;1) the default 0.68 is used.
+	 * @param confidenceLevel the confidence level as a fraction (0 < level <= 1). If out of range (<=0 or >1) the default 0.68 is used.
+	 * @param utypeDecoders decoders describing the error-related fields (passed to super)
+	 * @param dmid optional identifier for the produced instance (may be null)
 	 */
 	public PropertyError(String dmrole, String distribution,
-			double confidenceLevel, List<UtypeDecoder> utypeDecoders, String dmid) {
+					double confidenceLevel, List<UtypeDecoder> utypeDecoders, String dmid) {
 		super(dmrole, utypeDecoders, dmid);
 		this.distribtion = (distribution == null)? "Gaussian" : distribution;
+		// Enforce a sensible default when confidence level is outside (0,1]
 		this.confidenceLevel = (confidenceLevel <= 0 || confidenceLevel > 1)? 0.68: confidenceLevel;
+		this.dmrole = dmrole;
 	}
 
 	/**
@@ -61,11 +77,10 @@ public class PropertyError extends FlatInstance {
 	 * - <hostClass>.distribution : the distribution name (prefixed with '*')
 	 * - <hostClass>.confidenceLevel : the confidence level (prefixed with '*')
 	 *
-	 * @param mivotInstance target instance to receive the attributes
-	 * @param hostClass prefix used for attribute names
 	 * @throws Exception if the underlying mivotInstance.addAttribute calls fail
 	 */
 	public void addStatInfo() throws Exception {
+		// Ensure errorMivotInstance is available (created in getMivotInstance)
 		this.errorMivotInstance.addAttribute(
 				"ivoa:string",
 				this.hostClass + ".distribution",
@@ -78,9 +93,17 @@ public class PropertyError extends FlatInstance {
 				null);
 	}
 	
-	
+	/**
+	 * Build the MivotInstance representing the error and attach statistical info.
+	 *
+	 * This method delegates to {@link FlatInstance#getMivotInstance()} to build
+	 * a flat error instance from the configured UType decoders, then appends
+	 * distribution and confidenceLevel attributes.
+	 *
+	 * @return fully populated MivotInstance for the error
+	 * @throws Exception propagated from nested MivotInstance builders
+	 */
 	public  MivotInstance getMivotInstance() throws Exception {
-		
 		this.errorMivotInstance = super.getMivotInstance();
 		this.addStatInfo();
 		return this.errorMivotInstance;
