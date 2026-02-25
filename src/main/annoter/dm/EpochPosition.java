@@ -109,7 +109,6 @@ public class EpochPosition extends Property {
 				epoch = mappableColumn.getConstant(Glossary.CTClass.EPOCH);
 			}
 		}
-		
 		// If an epoch constant was found, add it as an observation date attribute
 		if( epoch != null ) {
 			// strip leading 'J' if present and prefix with '*' which signals a

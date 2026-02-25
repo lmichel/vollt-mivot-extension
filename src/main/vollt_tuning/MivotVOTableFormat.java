@@ -51,7 +51,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 		this.writeAnnotations(execReport, out);
 		out.flush();
 	}
-
+ 
 	/**
 	 * generate MIVOT annotations based on the Utypes stored in TAP_SCHMA.columns
 	 * @param execReport
