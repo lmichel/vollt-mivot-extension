@@ -283,7 +283,7 @@ public class MappingCache {
 				"mango:EpochPosition.pmLatitude[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("pmra", "description", "mas / yr", "ucd",
 				"mango:EpochPosition.pmLongitude[CS.spaceSys=ICRS]"));
-		tapColumns.add(new TAPColumn("parallax", "description", "mas", "ucd",
+		tapColumns.add(new TAPColumn("plx_value", "description", "mas", "ucd",
 				"mango:EpochPosition.parallax[CS.spaceSys=ICRS]"));
 		tapColumns.add(new TAPColumn("rvz_radvel", "description", "km / s", "ucd",
 				"mango:EpochPosition.radialVelocity[CS.spaceSys=ICRS]"));
