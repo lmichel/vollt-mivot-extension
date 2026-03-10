@@ -31,7 +31,7 @@ import tap.metadata.TAPColumn;
  *   problems (preserving original behaviour), but throws MappingError where
  *   appropriate for mapping-related consistency checks.
  */
-public class UtypeDecoder {
+public class UtypeDecoder implements Cloneable {
 	private TAPColumn tapColumn;
 	private String utype;
 	private String hostClass;
@@ -43,7 +43,7 @@ public class UtypeDecoder {
 	private String constantAndFrames;
 	private List<String> frames = new ArrayList<String>();
 	private List<String> constants = new ArrayList<String>();
-	
+	public String adqlName;
 	// Regex fragments used to recognise class/package/field names in UTypes.
 	String CLASS_NAME = "[A-Z][\\w]+"; // capitalised class name, e.g. EpochPosition
 	String PACKAGE= "[a-z][a-z0-9_]+";   // package prefix, e.g. mango
@@ -68,6 +68,8 @@ public class UtypeDecoder {
 	 */
 	public UtypeDecoder(TAPColumn tapColumn ){
 		this.tapColumn = tapColumn;
+		this.adqlName = this.tapColumn.getDBName();
+		
 		this.utype = this.tapColumn.getUtype() ;
 		String[] eles = utype.split(":" );
 
@@ -106,6 +108,11 @@ public class UtypeDecoder {
 
 	}
 	
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+    
 	/**
 	 * Try to parse a simple role form like "mango:Class.field".
 	 *
