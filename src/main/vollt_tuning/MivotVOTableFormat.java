@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 import adql.db.DBColumn;
+import adql.db.DBTable;
+import adql.db.DBTableAlias;
 import adql.parser.ParseException;
 import adql.query.ADQLQuery;
 import adql.query.from.ADQLTable;
@@ -30,7 +32,7 @@ import uws.service.log.UWSLog.LogLevel;
  * on the Utypes stored in TAP_SCHMA.columns
  */
 public class MivotVOTableFormat extends VOTableFormat {
-	
+
 	/**
 	 * Force TABLEDATA as output data format
 	 * @param service
@@ -51,7 +53,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 		this.writeAnnotations(execReport, out);
 		out.flush();
 	}
- 
+
 	/**
 	 * generate MIVOT annotations based on the Utypes stored in TAP_SCHMA.columns
 	 * @param execReport
@@ -62,8 +64,6 @@ public class MivotVOTableFormat extends VOTableFormat {
 
 		this.service.getLogger().log(LogLevel.INFO, "MIVOT", "@ MIVOT", null);
 		String query = execReport.parameters.getQuery();
-
-		Map<String, Set<String>> columns = new LinkedHashMap<String, Set<String>>();
 		
 		ADQLQuery parsedQuery = null;
 		try {
@@ -74,7 +74,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 			return;
 		}
 		Cache.setLogger(this.service.getLogger());
-		
+
 		FromContent from = parsedQuery.getFrom();
 		for( ADQLTable tapTable: from.getTables()) {
 			//MAPPING_CACHE.addADQLTable(tapTable);
@@ -87,20 +87,42 @@ public class MivotVOTableFormat extends VOTableFormat {
 		}
 
 		StringBuffer message = new StringBuffer();
+		/*
+		 * Fill the MAP:  searched table -> searched columns
+		 */
+		Map<String, Set<DBColumn>> columns = new LinkedHashMap<String, Set<DBColumn>>();
 		if( this.isQueryMappable(parsedQuery, message) == true ) {
 			Instant start = Instant.now();
-			
-
-			for(DBColumn col : execReport.resultingColumns) {
-				String table = col.getTable().getADQLName();
-				if( columns.keySet().contains(table) == false) {
-					columns.put(table, new HashSet<String>());
+			String outXml = "";
+			try {
+				for(DBColumn col : execReport.resultingColumns) {
+					/*
+					 * Get the table descriptor as read in the TAP SCHEMA
+					 * This is the one which is known by the mapping cache
+					 */
+					DBTable originDbTable = ((DBTableAlias) col.getTable()).getOriginTable();					
+					/*
+					 * No table means computed column: can be ignored
+					 */
+					if( originDbTable == null ) {
+						continue;
+					}
+					String tableAdqlName = originDbTable.getADQLName();
+					if( columns.keySet().contains(tableAdqlName) == false) {
+						columns.put(tableAdqlName, new HashSet<DBColumn>());
+					}
+					columns.get(tableAdqlName).add(col);
 				}
-				columns.get(table).add(col.getADQLName());
+				Cache.logDebug("Start writing annotations for tables ", columns.keySet().toString());
+				MivotAnnotations mivotAnnotations = new MivotAnnotations();
+				outXml = mivotAnnotations.mapMango(columns);
+			} catch(Exception e) {
+				e.printStackTrace();
+				Cache.logInfo(e.toString());
+				this.writeMappingError(e.toString(), out);	
+				return;
+
 			}
-			Cache.logDebug("Start writing annotations for tables ", columns.keySet().toString());
-			MivotAnnotations mivotAnnotations = new MivotAnnotations();
-			String outXml = mivotAnnotations.mapMango(columns);
 			Duration duration = Duration.between(start, Instant.now());
 			Cache.logDebug("Annotations generated in", duration.toMillis() + " ms");
 			try {
@@ -114,7 +136,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 			this.writeMappingError(message.toString(), out);			
 		}
 	}
-	
+
 	/**
 	 * Returns true if the query is considered as providing a mappable result
 	 * @TODO refine the criteria 
@@ -135,7 +157,7 @@ public class MivotVOTableFormat extends VOTableFormat {
 
 		return true;
 	}
-	
+
 	private void writeMappingError(String message, BufferedWriter out) {
 		MivotAnnotations mivotAnnotations = new MivotAnnotations();
 		mivotAnnotations.setReport(false, "Mapping failure: " + message);
