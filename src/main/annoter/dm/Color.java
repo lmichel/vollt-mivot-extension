@@ -69,7 +69,6 @@ public class Color extends Property {
 	 */
 	@SuppressWarnings("serial")
 	public Color(List<UtypeDecoder> utypeDecoders,
-				String tableName,
 				List<FrameHolder> frameHolders,
 				List<String> constants) throws Exception {
 

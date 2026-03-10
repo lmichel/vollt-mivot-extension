@@ -41,7 +41,6 @@ public class Property extends MivotInstance {
 	 */
 	private static Class<?>[] paramTypes = new Class<?>[] {
         List.class,     // List<UtypeDecoder>
-        String.class,   // tableName
         List.class ,     // List<FrameHolder>
         List.class // List<Constant>
 	};
@@ -161,11 +160,10 @@ public class Property extends MivotInstance {
      */
     public static Property getInstance(String className,
 					    List<UtypeDecoder> utds,
-					    String table,
 					    List<FrameHolder> frameHolders,
 					    List<String> constants) throws Exception {
 		Class<?> cls = Cache.getPropertyClass(className);
 		Constructor<?> constructor = cls.getConstructor(paramTypes);
-		return (Property) constructor.newInstance(utds, table, frameHolders, constants);
+		return (Property) constructor.newInstance(utds, frameHolders, constants);
 	}
 }

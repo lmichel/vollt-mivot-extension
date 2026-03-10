@@ -67,7 +67,6 @@ public class Label extends Property {
 	 * @throws Exception propagated from underlying getters (rare)
 	 */
 	public Label(List<UtypeDecoder> utypeDecoders,
-				String tableName,
 				List<FrameHolder> frameHolders,
 				List<String> constants) throws Exception {
 
