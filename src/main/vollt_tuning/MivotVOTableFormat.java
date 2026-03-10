@@ -100,7 +100,10 @@ public class MivotVOTableFormat extends VOTableFormat {
 					 * Get the table descriptor as read in the TAP SCHEMA
 					 * This is the one which is known by the mapping cache
 					 */
-					DBTable originDbTable = ((DBTableAlias) col.getTable()).getOriginTable();					
+					DBTable originDbTable = col.getTable();
+					if( originDbTable instanceof DBTableAlias) {
+						originDbTable = ((DBTableAlias) col.getTable()).getOriginTable();	
+					}
 					/*
 					 * No table means computed column: can be ignored
 					 */
