@@ -135,7 +135,7 @@ public class MappingCache {
 	 * @param adqlTableName table name
 	 * @return map of columnName -> UtypeDecoder or null if the table is unknown
 	 */
-	private Map<String, UtypeDecoder> getTableMapping(String adqlTableName){
+	public Map<String, UtypeDecoder> getTableMapping(String adqlTableName){
 		return this.utypeMap.get(adqlTableName);
 	}
 	
