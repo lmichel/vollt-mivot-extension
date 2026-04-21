@@ -146,7 +146,7 @@ public class MappingCache {
 	 * @param hostClass host class name to filter by (e.g. "mango:EpochPosition")
 	 * @return list of matching UtypeDecoder (empty list when none)
 	 */
-	public List<UtypeDecoder> getTableMapping(String adqlTableName, String hostClass){
+	public List<UtypeDecoder> TRASH_getTableMapping(String adqlTableName, String hostClass){
 		List<UtypeDecoder> tableMapping = new ArrayList<UtypeDecoder>();
 		if( this.getTableMapping(adqlTableName) == null ) {
 			return tableMapping;
@@ -192,23 +192,39 @@ public class MappingCache {
 	 * @param hostClass host class to filter by
 	 * @param selectedColumns list of ADQL column names to include (filters results)
 	 * @return LinkedHashMap keyed by constant/frames descriptor with lists of decoders
+	 * @throws CloneNotSupportedException 
 	 */
-	public Map<String, List<UtypeDecoder>> getTableMapping(String adqlTableName, String hostClass, List<String> selectedColumns){
+	public Map<String, List<UtypeDecoder>> getTableMapping(String adqlTableName, String hostClass, List<DBColumn> selectedColumns) throws CloneNotSupportedException{
 		Map<String, List<UtypeDecoder>> tableMapping = new LinkedHashMap<String, List<UtypeDecoder>>();
 		if( this.getTableMapping(adqlTableName) == null ) {
 			return tableMapping;
 		}
 		for( UtypeDecoder utypeDecoder: this.getTableMapping(adqlTableName).values()) {
 			if( utypeDecoder.getHostClass().equals(hostClass)) {
+				for( DBColumn dbColumn : selectedColumns) {
+					if( dbColumn.getDBName().equals(utypeDecoder.getTapColumn().getADQLName())) {
+						String key = utypeDecoder.getConstantAndFrames();
+						if( key == null) key = "default";
+						if( tableMapping.containsKey(key) == false ) {
+							tableMapping.put(key, new ArrayList<UtypeDecoder>());
+						}
+						UtypeDecoder cloneUtd = (UtypeDecoder) utypeDecoder.clone();
+						cloneUtd.adqlName = dbColumn.getADQLName();
+						tableMapping.get(key).add(cloneUtd);						
+					}
+				}
 				// Only include decoders whose ADQL column name is present in selectedColumns
+				/**
 				if( selectedColumns.contains(utypeDecoder.getTapColumn().getADQLName()) ) {
 					String key = utypeDecoder.getConstantAndFrames();
 					if( key == null) key = "default";
 					if( tableMapping.containsKey(key) == false ) {
 						tableMapping.put(key, new ArrayList<UtypeDecoder>());
 					}
-					tableMapping.get(key).add(utypeDecoder);
+					UtypeDecoder cloneUtd = (UtypeDecoder) utypeDecoder.clone();
+					tableMapping.get(key).add(cloneUtd);
 				}
+				**/
 			}
 		}
 		return tableMapping;
@@ -222,7 +238,7 @@ public class MappingCache {
 	 * @param utype fully qualified utype string to look for
 	 * @return the ADQL column name mapped to the utype, or null
 	 */
-	public  String getUtypeMappedColumn(String adqlTableName, String utype) {
+	private  String TRASH_getUtypeMappedColumn(String adqlTableName, String utype) {
 		if( this.getTableMapping(adqlTableName) == null ) {
 			return null;
 		}
@@ -244,14 +260,17 @@ public class MappingCache {
 	 * @param selectedColumns list of ADQL columns considered available
 	 * @return ADQL column name if present in selectedColumns; otherwise null
 	 */
-	public  String getUtypeMappedColumn(String adqlTableName, String utype, List<String> selectedColumns) {
+	public  String getUtypeMappedColumn(String adqlTableName, String utype, List<DBColumn> selectedColumns) {
 		if( this.getTableMapping(adqlTableName) == null ) {
 			return null;
 		}
 		for( UtypeDecoder utypeDecoder: this.getTableMapping(adqlTableName).values()) {
 			if( utypeDecoder.getUtype() != null && utypeDecoder.getUtype().equals(utype)) {
-				String colName = utypeDecoder.getTapColumn().getADQLName();
-				return (selectedColumns.contains(colName)?colName: null);
+				for(DBColumn selectedColumn: selectedColumns) {
+					if(selectedColumn.getDBName().equals(utypeDecoder.getTapColumn().getDBName()) ){
+						return( selectedColumn.getADQLName());
+					}
+				}
 			}
 		}
 		return null;
@@ -273,7 +292,7 @@ public class MappingCache {
 
 		List<TAPColumn> tapColumns = new ArrayList<TAPColumn>();
 
-		tapColumns.add(new TAPColumn("main_id", "description", "", "ucd",
+		tapColumns.add(new TAPColumn("id_princ", "description", "", "ucd",
 				"mango:MangoObject.identifier"));
 		tapColumns.add(new TAPColumn("dec", "description", "deg", "ucd",
 				"mango:EpochPosition.latitude[CS.spaceSys=ICRS]"));

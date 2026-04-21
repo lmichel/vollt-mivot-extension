@@ -92,7 +92,6 @@ public class Brightness extends Property {
 	 */
 	@SuppressWarnings("serial")
 	public Brightness(List<UtypeDecoder> utypeDecoders,
-					String tableName,
 					List<FrameHolder> frameHolders,
 					List<String> constants) throws Exception {
 

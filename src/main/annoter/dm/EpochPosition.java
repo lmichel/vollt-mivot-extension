@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.annoter.cache.MappingCache;
 import main.annoter.meta.Glossary;
 import main.annoter.meta.UtypeDecoder;
 import main.annoter.mivot.FrameHolder;
@@ -52,7 +51,6 @@ public class EpochPosition extends Property {
 
 	public static final String DMTYPE = "mango:EpochPosition";
 	public List<String> frames;
-	private String tableName;
 	private List<UtypeDecoder> positionErrorUtypes = new ArrayList<>();
 	private List<UtypeDecoder> pmErrorUtypes = new ArrayList<>();
 	private List<UtypeDecoder> parallaxErrorUtypes = new ArrayList<>();
@@ -76,7 +74,6 @@ public class EpochPosition extends Property {
 	 * @throws Exception propagated from nested constructors or builders
 	 */
 	public EpochPosition(List<UtypeDecoder> utypeDecoders,
-					String tableName,
 					List<FrameHolder> frameHolders,
 					List<String> constants) throws Exception {
 
@@ -87,26 +84,25 @@ public class EpochPosition extends Property {
 			put("label", "Astronomical location");
 			}
 		});
-		this.tableName = tableName;
 		
 		// epoch constant if present (CT:epoch qualifier)
 		String epoch = null;
 		// Iterate through decoders provided for the current table mapping
-		for (UtypeDecoder mappableColumn : utypeDecoders) {
-			String attribute = mappableColumn.getHostAttribute();
-			TAPColumn tapColumn = mappableColumn.getTapColumn();
-			String adqlName = tapColumn.getADQLName();
+		for (UtypeDecoder mappableColumnUtypeDecoder : utypeDecoders) {
+			String attribute = mappableColumnUtypeDecoder.getHostAttribute();
+			TAPColumn tapColumn = mappableColumnUtypeDecoder.getTapColumn();
+			String adqlName = mappableColumnUtypeDecoder.adqlName;
 			// keep any CS/CT frame qualifiers discovered on the decoder
-			this.frames = mappableColumn.getFrames();
+			this.frames = mappableColumnUtypeDecoder.getFrames();
 			// Only add top-level attributes (those without innerRole) as direct
 			// RealQuantity attributes. Inner-role attributes represent structured
 			// pieces (like errors) which are handled separately.
-			if( mappableColumn.getInnerRole() == null ) {
+			if( mappableColumnUtypeDecoder.getInnerRole() == null ) {
 				this.addAttribute("ivoa:RealQuantity", DMTYPE + "." + attribute, adqlName, tapColumn.getUnit());
 			}
 			// If the decoder carries a CT:epoch constant, record it for later
 			if( epoch == null ) {
-				epoch = mappableColumn.getConstant(Glossary.CTClass.EPOCH);
+				epoch = mappableColumnUtypeDecoder.getConstant(Glossary.CTClass.EPOCH);
 			}
 		}
 		// If an epoch constant was found, add it as an observation date attribute
@@ -120,7 +116,7 @@ public class EpochPosition extends Property {
 		}
 
 		// Build and attach an error instance if error-related UTypes are present
-		MivotInstance erri = this.buildEpochErrors();
+		MivotInstance erri = this.buildEpochErrors(utypeDecoders);
 		if (erri != null) {
 			this.addInstance(erri);
 		}
@@ -148,15 +144,14 @@ public class EpochPosition extends Property {
 	 * @return a MivotInstance representing the errors, or null when no errors mapped
 	 * @throws Exception propagated from inner builders or checks
 	 */
-	private MivotInstance buildEpochErrors()
+	private MivotInstance buildEpochErrors(List<UtypeDecoder> utypeDecoders)
 				throws Exception {
-		MappingCache MAPPING_CACHE = MappingCache.getCache();
 
 		// Retrieve all decoders for this table that claim to map to mango:EpochPosition
-		List<UtypeDecoder> mappableColumns = MAPPING_CACHE.getTableMapping(this.tableName, DMTYPE);
+		//List<UtypeDecoder> mappableColumns = MAPPING_CACHE.getTableMapping(this.tableName, DMTYPE);
 
 		// Group decoders by their inner role (errors.position, errors.properMotion, errors.parallax)
-		for (UtypeDecoder mappableColumn : mappableColumns) {
+		for (UtypeDecoder mappableColumn : utypeDecoders) {
 			if( "errors".equals(mappableColumn.getHostAttribute()) ){
 				if ("position".equals(mappableColumn.getInnerRole())) {
 					// Validate consistency of inner class when adding to the list

@@ -2,6 +2,7 @@ package main.annoter.mivot;
 
 import java.util.*;
 
+import adql.db.DBColumn;
 import main.annoter.cache.Cache;
 import main.annoter.cache.MappingCache;
 import main.annoter.cache.SessionCache;
@@ -313,7 +314,7 @@ public class MivotAnnotations {
 	 * @return String containing a <RESOURCE type="meta"> wrapper with the generated
 	 *         MIVOT block
 	 */
-	public String mapMango(Map<String, Set<String>> columns) {
+	public String mapMango(Map<String, Set<DBColumn>> columns) {
 		MappingCache MAPPING_CACHE = MappingCache.getCache();
 		// Build the annotations
 		MivotAnnotations mivotAnnotation = new MivotAnnotations();
@@ -325,7 +326,7 @@ public class MivotAnnotations {
 			String utypeMappedColumn = null;
 			for (String table : columns.keySet()) {
 				utypeMappedColumn = MAPPING_CACHE.getUtypeMappedColumn(table, "mango:MangoObject.identifier",
-					new ArrayList<String>(columns.get(table)));
+					new ArrayList<DBColumn>(columns.get(table)));
 				if (utypeMappedColumn != null) {
 					break;
 				}
@@ -336,13 +337,14 @@ public class MivotAnnotations {
 				// Look for mapping rules for the property in the current table
 				Cache.logDebug("Looking at property: ", supportedProperty);
 				for (String table : columns.keySet()) {
-					List<String>selectedColumns =new ArrayList<String>(columns.get(table));
+					List<DBColumn>selectedColumns =new ArrayList<DBColumn>(columns.get(table));
 					Cache.logDebug(" Check if table: ", table, selectedColumns.toString(), "maps it");
 
 					Map<String, List<UtypeDecoder>> propertyMapping = MAPPING_CACHE.getTableMapping(
 						table,
 						"mango:" + supportedProperty,
 						selectedColumns);
+
 					List<String> constants = new ArrayList<String>();
 					for (String key : propertyMapping.keySet()) {
 						Cache.logDebug("Found mapping for property ",supportedProperty ,"in table",
@@ -357,7 +359,7 @@ public class MivotAnnotations {
 						for (String ct : utds.get(0).getConstants()) {
 							constants.add(ct);
 						}
-						Property property = (Property) Property.getInstance(supportedProperty, utds, table,
+						Property property = (Property) Property.getInstance(supportedProperty, utds,
 								frameHolders, constants);
 						mi.addMangoProperties(property);
 					}
