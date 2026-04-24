@@ -109,8 +109,23 @@ public class EpochPosition extends Property {
 		if( epoch != null ) {
 			// strip leading 'J' if present and prefix with '*' which signals a
 			// constant value in the Mivot convention used by this project.
-			this.addAttribute("year","mango:EpochPosition.obsDate",
-					"*" + epoch.replace("J",""),
+			String epochValue ;
+			String epochType;
+			if( epoch.startsWith("J") ) {
+				epochValue = epoch.substring(1);
+				epochType = "mango:JulianEpoch";
+			}
+			else if( epoch.startsWith("B") ) {
+				epochValue = epoch.substring(1);
+				epochType = "mango:BesselianEpoch";
+			}
+			else  {
+				epochValue = epoch;
+				epochType = "mango:DecimalYear";
+			}
+			Double.parseDouble(epochValue); // sanity check that the value is numeric
+			this.addAttribute(epochType, "mango:EpochPosition.obsDate",
+					"*" + epochValue,
 					null);
 
 		}
