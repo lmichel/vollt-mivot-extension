@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import adql.db.DBColumn;
 
 import main.annoter.cache.MappingCache;
 import main.annoter.mivot.MivotAnnotations;
@@ -78,7 +79,7 @@ public class TestMivotAnnotations {
 
 	}
 
-	private static Map<String, Set<String>>  getSelectedColumns() {
+	private static Map<String, Set<DBColumn>>  getSelectedColumns() {
 		//return Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
 		//		"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel");
 		//return Arrays.asList("magnitude_u", "mag_error_u", "magnitude_k", "mag_k_error");
@@ -89,7 +90,7 @@ public class TestMivotAnnotations {
 		//  	"pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel", 
 		//		"magnitude_u", "mag_u_errorup", "mag_u_errordown", "magnitude_k", "mag_k_error");
 		//return Arrays.asList("otype");
-		Map<String, Set<String>> basicTableMap = new LinkedHashMap<String, Set<String>>();
+		Map<String, Set<DBColumn>> basicTableMap = new LinkedHashMap<String, Set<DBColumn>>();
 		basicTableMap.put("basic", new HashSet<String>(
 				Arrays.asList("main_id", "ra", "dec", "coo_err_maja", "coo_err_mina", "coo_err_angle", "pmra", "pmdec",
 				          	  "pm_err_maja", "pm_err_mina", "pm_err_angle", "parallax", "rvz_radvel")));
@@ -105,7 +106,7 @@ public class TestMivotAnnotations {
 		// to be done at service startup
 		buildCache();
 		// get metadata from the parser
-		 Map<String, Set<String>> selectedColumns = getSelectedColumns();
+		 Map<String, Set<DBColumn>> selectedColumns = getSelectedColumns();
 
 		Instant start = Instant.now();
 		String outXml = (new MivotAnnotations()).mapMango(selectedColumns);
