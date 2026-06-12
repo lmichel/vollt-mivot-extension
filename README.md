@@ -19,7 +19,7 @@ The project has been designed to annotate TAP Simbad responses.
     - Build a jar
         - `cd ./lib/main/  jar cvf ../../mivot.jar main`
     - Place it in `WEB-INF/lib`
-        - `cp  pyvo WebContent/WEB-INF/lib`
+        - `cp  mivot.jar WebContent/WEB-INF/lib`
 - Set the Utypes in the `TAP_SCHEMA/columns` table following yhe examples given in `./src/sql`
 - The query response annoter is invoked if `RESPONSEFORMAT=application/x-votable+xml;content=mivot` or `RESPONSEFORMAT=mivot`
 - This Mime type is defined in `main.vollt_tuning.MangotFormat`
