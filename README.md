@@ -50,3 +50,5 @@ The VOTable formator check the parsed query to see if some selected columns ca b
 - `main.annoter.meta`: classes handling the mapping rules stored in tne TAP Schema as pseudo Utypes.
 - `main.annoter.utils`: Some utilities
 
+*Note: The code has been mainly commented by ChatGPT*
+
